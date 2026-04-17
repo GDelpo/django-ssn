@@ -1,0 +1,67 @@
+{% extends "forms/partials/_base_form.html" %}
+{% load component_tags %}
+{% block form_fields %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {# Sección principal de datos #}
+    <div class="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+      <h3 class="text-lg font-semibold text-blue-700 mb-3">
+        <i class="fas fa-file-invoice mr-2"></i> Información Principal
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {# Renderizamos tipo_operacion primero #}
+        {% for field in form %}
+          {% if field.name == "tipo_operacion" or field.name == "codigo_afectacion" %}
+            {% include "forms/partials/_field.html"  with field=field special_fields="tipo_operacion codigo_afectacion" %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Renderizamos campos de fecha y especies #}
+    <div class="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+      <h3 class="text-lg font-semibold text-blue-700 mb-3">
+        <i class="fas fa-calendar-alt mr-2"></i> Detalles de Operación
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for field in form %}
+          {% if field.name != "tipo_operacion" and field.name != "codigo_afectacion" and field.name != "comprobante" %}
+            {% include "forms/partials/_field.html"  with field=field special_fields="tipo_operacion codigo_afectacion cant_especies" %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Renderizamos "comprobante" en un div que abarca las dos columnas #}
+    <div class="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <h3 class="text-lg font-semibold text-blue-700 mb-3">
+        <i class="fas fa-file-upload mr-2"></i> Documentación
+      </h3>
+      {% if form.instance.comprobante %}
+        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <a href="{{ form.instance.comprobante.url }}" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <i class="fas fa-file-alt mr-2"></i>
+            {{ form.instance.comprobante.name|default:"Ver comprobante" }}
+          </a>
+        </div>
+      {% else %}
+        <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-500">
+          <i class="fas fa-info-circle mr-2"></i>
+          No hay comprobante adjunto
+        </div>
+      {% endif %}
+    </div>
+
+    {# Subformularios para detalles en caso de canje #}
+    {% if form.detalle_a_form %}
+      <!-- Mantener código de detalle_a_form pero con campos deshabilitados -->
+    {% endif %}
+
+    {% if form.detalle_b_form %}
+      <!-- Mantener código de detalle_b_form pero con campos deshabilitados -->
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block submit_button %}
+  {% link_button href=header_buttons.0.href label="Volver al listado" icon="fas fa-arrow-left" color="secondary" %}
+{% endblock %}

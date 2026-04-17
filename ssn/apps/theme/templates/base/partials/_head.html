@@ -1,0 +1,14 @@
+{% load static tailwind_tags %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}{{ title|default:"Mi Aplicación" }}{% endblock %}</title>
+
+{# Favicon de la compañía #}
+<link rel="icon" type="image/x-icon" href="{{ COMPANY_FAVICON_URL }}">
+<link rel="shortcut icon" href="{{ COMPANY_FAVICON_URL }}">
+
+{% tailwind_preload_css %}
+
+{% tailwind_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

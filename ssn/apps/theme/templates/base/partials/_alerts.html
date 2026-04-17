@@ -1,0 +1,136 @@
+{# Componente de alertas de vencimientos - Estilo consistente con messages.html #}
+{% if alerts and alerts_count > 0 %}
+<div id="alerts-container" class="w-full">
+  
+  {# Barra colapsada (oculta inicialmente) - Estilo footer, ancho completo #}
+  <div id="alerts-collapsed-bar" class="hidden cursor-pointer w-full bg-blue-600 hover:bg-blue-700 transition-all duration-300">
+    <div class="py-4 text-center">
+      <div class="inline-flex items-center justify-center space-x-4">
+        <i class="fas fa-bell text-white text-lg"></i>
+        <span class="text-base font-semibold text-white tracking-wide">
+          {% if has_urgent_alerts %}ALERTAS PENDIENTES{% else %}PRESENTACIONES PENDIENTES{% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {# Vista expandida (visible inicialmente) #}
+  <div id="alerts-expanded-view" class="bg-gray-50 border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {% if alerts|length > 2 %}
+      {# Banner compacto cuando hay múltiples alertas #}
+      <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+        {# Header del banner #}
+        <div class="px-6 py-4 {% if has_urgent_alerts %}bg-gradient-to-r from-red-50 to-transparent border-b border-red-100{% else %}bg-gradient-to-r from-yellow-50 to-transparent border-b border-yellow-100{% endif %}">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-md {% if has_urgent_alerts %}bg-red-100{% else %}bg-yellow-100{% endif %}">
+                {% if has_urgent_alerts %}
+                <i class="fas fa-exclamation-circle text-red-600 text-lg"></i>
+                {% else %}
+                <i class="fas fa-clock text-yellow-600 text-lg"></i>
+                {% endif %}
+              </div>
+              <div>
+                <h3 class="text-lg font-bold {% if has_urgent_alerts %}text-red-700{% else %}text-yellow-700{% endif %}">
+                  {% if has_urgent_alerts %}¡Atención! Presentaciones vencidas{% else %}Presentaciones pendientes{% endif %}
+                </h3>
+                <p class="text-sm {% if has_urgent_alerts %}text-red-600{% else %}text-yellow-600{% endif %}">
+                  Tienes {{ alerts_count }} presentación{% if alerts_count > 1 %}es{% endif %} que requiere{% if alerts_count > 1 %}n{% endif %} tu atención
+                </p>
+              </div>
+            </div>
+            <button type="button" 
+                    onclick="document.getElementById('alerts-expanded').classList.toggle('hidden'); this.querySelector('svg').classList.toggle('rotate-180');"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors
+                           {% if has_urgent_alerts %}bg-red-100 text-red-700 hover:bg-red-200{% else %}bg-yellow-100 text-yellow-700 hover:bg-yellow-200{% endif %}">
+              Ver detalles
+              <svg class="ml-2 h-4 w-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        {# Lista expandible de alertas #}
+        <div id="alerts-expanded" class="hidden p-4 space-y-3 bg-gray-50">
+          {% for alert in alerts %}
+          <div class="flex items-center p-4 rounded-md shadow-sm border-l-4 transition-all duration-200 hover:shadow-md
+            {% if alert.level.value == 'danger' %}bg-red-100 text-red-700 border-red-500 hover:bg-red-200
+            {% elif alert.level.value == 'warning' %}bg-yellow-100 text-yellow-800 border-yellow-500 hover:bg-yellow-200
+            {% else %}bg-blue-100 text-blue-700 border-blue-500 hover:bg-blue-200{% endif %}">
+            <div class="flex-shrink-0">
+              {% if alert.level.value == 'danger' %}
+              <i class="fas fa-exclamation-circle"></i>
+              {% elif alert.level.value == 'warning' %}
+              <i class="fas fa-clock"></i>
+              {% else %}
+              <i class="fas fa-info-circle"></i>
+              {% endif %}
+            </div>
+            <div class="ml-3 flex-1">
+              <span class="font-semibold">{{ alert.title }}</span>
+              <span class="ml-2">{{ alert.message }}</span>
+            </div>
+            {% if alert.url %}
+            <div class="ml-4 flex-shrink-0">
+              <a href="{{ alert.url }}" 
+                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors
+                 {% if alert.level.value == 'danger' %}bg-red-600 hover:bg-red-700 text-white
+                 {% elif alert.level.value == 'warning' %}bg-yellow-600 hover:bg-yellow-700 text-white
+                 {% else %}bg-blue-600 hover:bg-blue-700 text-white{% endif %}">
+                {{ alert.button_label }}
+                <i class="fas fa-arrow-right ml-1.5"></i>
+              </a>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      {% else %}
+      {# Mostrar alertas individuales cuando son pocas (1-2) #}
+      <div class="space-y-4">
+        {% for alert in alerts %}
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div class="flex items-center justify-between p-4 border-l-4
+            {% if alert.level.value == 'danger' %}border-red-500 bg-red-100
+            {% elif alert.level.value == 'warning' %}border-yellow-500 bg-yellow-100
+            {% else %}border-blue-500 bg-blue-100{% endif %}">
+            <div class="flex items-center space-x-4">
+              <div class="flex-shrink-0">
+                {% if alert.level.value == 'danger' %}
+                <i class="fas fa-exclamation-circle text-xl text-red-600"></i>
+                {% elif alert.level.value == 'warning' %}
+                <i class="fas fa-clock text-xl text-yellow-600"></i>
+                {% else %}
+                <i class="fas fa-info-circle text-xl text-blue-600"></i>
+                {% endif %}
+              </div>
+              <div>
+                <h3 class="font-semibold {% if alert.level.value == 'danger' %}text-red-700{% elif alert.level.value == 'warning' %}text-yellow-700{% else %}text-blue-700{% endif %}">{{ alert.title }}</h3>
+                <p class="text-sm {% if alert.level.value == 'danger' %}text-red-600{% elif alert.level.value == 'warning' %}text-yellow-600{% else %}text-blue-600{% endif %}">{{ alert.message }}</p>
+              </div>
+            </div>
+            {% if alert.url %}
+            <a href="{{ alert.url }}" 
+               class="flex-shrink-0 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 shadow-sm hover:shadow-md text-white
+               {% if alert.level.value == 'danger' %}bg-red-600 hover:bg-red-700
+               {% elif alert.level.value == 'warning' %}bg-yellow-500 hover:bg-yellow-600
+               {% else %}bg-blue-600 hover:bg-blue-700{% endif %}"
+               style="{% if alert.level.value == 'danger' %}background-color: #dc2626 !important;{% endif %}">
+              Ir a cargar
+              <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+    
+</div>
+{% endif %}

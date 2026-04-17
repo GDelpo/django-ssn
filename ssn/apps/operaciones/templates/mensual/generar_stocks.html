@@ -1,0 +1,177 @@
+{% extends "partials/_base_layout.html" %}
+{% load component_tags %}
+
+{% block main_content_operaciones %}
+<div class="space-y-6">
+  
+  {# Información del estado actual #}
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <h3 class="text-lg font-semibold text-blue-800 mb-2">
+      <i class="fas fa-info-circle mr-2"></i>
+      Generación Automática de Stocks Mensuales
+    </h3>
+    <p class="text-blue-700 text-sm">
+      Este proceso genera automáticamente los stocks del mes <strong>{{ base_request.cronograma }}</strong>
+      combinando el stock del mes anterior con las operaciones semanales del mes.
+    </p>
+  </div>
+
+  {# Advertencia de semanas faltantes #}
+  {% if has_missing_weeks %}
+    <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+      <h4 class="text-md font-semibold text-yellow-800 mb-2">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        Semanas Faltantes
+      </h4>
+      <p class="text-yellow-700 text-sm mb-2">
+        Las siguientes semanas no tienen solicitud registrada:
+      </p>
+      <div class="flex flex-wrap gap-2">
+        {% for week in missing_weeks %}
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800">
+            {{ week }}
+          </span>
+        {% endfor %}
+      </div>
+      <p class="text-yellow-600 text-xs mt-2">
+        <i class="fas fa-info-circle mr-1"></i>
+        Si continúa, los stocks se generarán con los datos disponibles.
+      </p>
+    </div>
+  {% endif %}
+
+  {# Stock del mes anterior #}
+  <div class="bg-white border border-gray-200 rounded-lg p-4">
+    <h4 class="text-md font-semibold text-gray-800 mb-3">
+      <i class="fas fa-history mr-2 text-gray-500"></i>
+      Stock del Mes Anterior ({{ prev_cronograma }})
+    </h4>
+    {% if prev_request %}
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="bg-green-50 rounded p-3">
+          <div class="text-2xl font-bold text-green-600">
+            {{ prev_request.stocks_inversion_mensuales.count }}
+          </div>
+          <div class="text-xs text-green-700">Inversiones</div>
+        </div>
+        <div class="bg-blue-50 rounded p-3">
+          <div class="text-2xl font-bold text-blue-600">
+            {{ prev_request.stocks_plazofijo_mensuales.count }}
+          </div>
+          <div class="text-xs text-blue-700">Plazos Fijos</div>
+        </div>
+        <div class="bg-purple-50 rounded p-3">
+          <div class="text-2xl font-bold text-purple-600">
+            {{ prev_request.stocks_chequespd_mensuales.count }}
+          </div>
+          <div class="text-xs text-purple-700">Cheques PD</div>
+        </div>
+      </div>
+    {% else %}
+      <div class="bg-gray-50 rounded p-4 text-center">
+        <i class="fas fa-inbox text-gray-400 text-3xl mb-2"></i>
+        <p class="text-gray-500 text-sm">
+          No existe stock del mes anterior.<br>
+          Los stocks se generarán solo con las operaciones del mes.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Semanas encontradas #}
+  <div class="bg-white border border-gray-200 rounded-lg p-4">
+    <h4 class="text-md font-semibold text-gray-800 mb-3">
+      <i class="fas fa-calendar-week mr-2 text-gray-500"></i>
+      Operaciones Semanales del Mes
+    </h4>
+    {% if weekly_requests %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-3 py-2 text-left text-xs font-semibold text-gray-600">Semana</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">Compras</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">Ventas</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">Canjes</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">Plazos Fijos</th>
+              <th class="px-3 py-2 text-center text-xs font-semibold text-gray-600">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for req in weekly_requests %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2 font-medium">{{ req.cronograma }}</td>
+                <td class="px-3 py-2 text-center">{{ req.compras.count }}</td>
+                <td class="px-3 py-2 text-center">{{ req.ventas.count }}</td>
+                <td class="px-3 py-2 text-center">{{ req.canjes.count }}</td>
+                <td class="px-3 py-2 text-center">{{ req.plazos_fijos.count }}</td>
+                <td class="px-3 py-2 text-center">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                    {% if req.estado == 'PRESENTADO' %}bg-green-100 text-green-800
+                    {% elif req.estado == 'BORRADOR' %}bg-gray-100 text-gray-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ req.get_estado_display }}
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="bg-gray-50 rounded p-4 text-center">
+        <i class="fas fa-calendar-times text-gray-400 text-3xl mb-2"></i>
+        <p class="text-gray-500 text-sm">
+          No se encontraron operaciones semanales para este mes.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Acciones #}
+  <div class="bg-white border border-gray-200 rounded-lg p-4">
+    {% if can_generate %}
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button type="submit" name="generate_action" 
+                  class="flex-1 inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <i class="fas fa-magic mr-2"></i>
+            Generar Stocks Automáticamente
+          </button>
+        </div>
+      </form>
+    {% else %}
+      <div class="bg-orange-50 border border-orange-200 rounded p-4 mb-4">
+        <p class="text-orange-700 text-sm">
+          <i class="fas fa-exclamation-circle mr-2"></i>
+          Ya existen <strong>{{ existing_stocks_count }}</strong> stocks para este mes.
+          Debe eliminarlos primero si desea regenerar.
+        </p>
+      </div>
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button type="submit" name="delete_stocks_action" id="deleteStocksBtn"
+                  class="flex-1 inline-flex justify-center items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            <i class="fas fa-trash mr-2"></i>
+            Eliminar Stocks y Volver a Generar
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const deleteBtn = document.getElementById('deleteStocksBtn');
+    if (deleteBtn) {
+      initConfirmButton('#deleteStocksBtn', '¿Está seguro de eliminar todos los stocks generados? Esta acción no se puede deshacer.');
+    }
+  });
+</script>
+{% endblock %}

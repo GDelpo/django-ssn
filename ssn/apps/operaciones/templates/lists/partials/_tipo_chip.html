@@ -1,0 +1,48 @@
+{# _tipo_chip.html #}
+{% comment %}
+  Recibe: tipo, valor, size (opcional), show_icon (bool)
+  - tipo: compra, venta, canje, stock_inversion, stock_plazofijo, etc.
+  - valor: display text (opcional, si querés sobreescribir)
+{% endcomment %}
+{% with chip_classes="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium mr-2" %}
+  {% if tipo == 'C' or tipo == 'compra' %}
+    <span class="{{ chip_classes }} bg-green-100 text-green-800">
+      {% if show_icon %}<i class="fas fa-arrow-right mr-1"></i>{% endif %}
+      {{ valor|default:'Compra' }}
+    </span>
+  {% elif tipo == 'V' or tipo == 'venta' %}
+    <span class="{{ chip_classes }} bg-red-100 text-red-800">
+      {% if show_icon %}<i class="fas fa-arrow-left mr-1"></i>{% endif %}
+      {{ valor|default:'Venta' }}
+    </span>
+  {% elif tipo == 'J' or tipo == 'canje' %}
+    <span class="{{ chip_classes }} bg-blue-100 text-blue-800">
+      {% if show_icon %}<i class="fas fa-exchange-alt mr-1"></i>{% endif %}
+      {{ valor|default:'Canje' }}
+    </span>
+  {% elif tipo == 'P' or tipo == 'plazo_fijo' %}
+    <span class="{{ chip_classes }} bg-yellow-100 text-yellow-800">
+      {% if show_icon %}<i class="fas fa-piggy-bank mr-1"></i>{% endif %}
+      {{ valor|default:'Plazo Fijo' }}
+    </span>
+  {% elif tipo == 'I' or tipo == 'inversion' or tipo == 'SI' %}
+    <span class="{{ chip_classes }} bg-purple-100 text-purple-800">
+      {% if show_icon %}<i class="fas fa-coins mr-1"></i>{% endif %}
+      {{ valor|default:'Inversión' }}
+    </span>
+  {% elif tipo == 'SP' %}
+    <span class="{{ chip_classes }} bg-yellow-100 text-yellow-800">
+      {% if show_icon %}<i class="fas fa-piggy-bank mr-1"></i>{% endif %}
+      {{ valor|default:'Plazo Fijo' }}
+    </span>
+  {% elif tipo == 'SC' %}
+    <span class="{{ chip_classes }} bg-indigo-100 text-indigo-800">
+      {% if show_icon %}<i class="fas fa-money-check mr-1"></i>{% endif %}
+      {{ valor|default:'Cheque P.D.' }}
+    </span>
+  {% else %}
+    <span class="{{ chip_classes }} bg-gray-100 text-gray-800">
+      {{ valor|default:tipo }}
+    </span>
+  {% endif %}
+{% endwith %}

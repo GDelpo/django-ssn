@@ -1,0 +1,159 @@
+# ============================================================================
+# SSN Django - Docker Compose (Production with Traefik)
+# ============================================================================
+#
+# PREREQUISITES:
+#   1. Traefik running in the main workspace:
+#      cd /path/to/workspace && docker compose -f docker-compose.traefik.yml up -d
+#   2. Network created: docker network create traefik-public
+#   3. .env file configured in parent directory
+#   4. DNS: SSL_DOMAIN resolves to the server IP
+#
+# USAGE (default - without Nginx, WhiteNoise serves static files):
+#   cd python_django_ssn
+#   docker compose --env-file .env -f docker/docker-compose.prod.traefik.yml up -d --build
+#   docker compose --env-file .env -f docker/docker-compose.prod.traefik.yml logs -f
+#
+# USAGE (with Nginx for static/media - optional override):
+#   docker compose --env-file .env \
+#     -f docker/docker-compose.prod.traefik.yml \
+#     -f docker/docker-compose.prod.traefik.nginx.yml \
+#     up -d --build
+#
+# ACCESS:
+#   Via Traefik: http://<SSL_DOMAIN>/
+#   Health:      http://<SSL_DOMAIN>/health/
+#
+# ARCHITECTURE:
+#   Default:    Client → Traefik → Gunicorn (Django + WhiteNoise)
+#   With Nginx: Client → Traefik → Nginx (static/media) → Gunicorn (Django)
+#
+# REQUIRED .env VARS:
+#   POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, SECRET_KEY, ALLOWED_HOSTS,
+#   SSL_DOMAIN
+#
+# NOTE: DJANGO_SETTINGS_MODULE and DEBUG are hardcoded in this compose file
+#   to ensure production settings are ALWAYS used, regardless of .env values.
+#
+# TRAEFIK ROUTING:
+#   Uses Host-based routing with SSL_DOMAIN - the domain you already have in
+#   DNS pointing to this server. This is the same domain used for Nginx SSL.
+#
+#   How requests are routed (all 3 services on the same server/IP):
+#     http://SSL_DOMAIN/identity/*  → identity service (PathPrefix)
+#     http://SSL_DOMAIN/mailsender/* → mailsender service (PathPrefix) 
+#     http://SSL_DOMAIN/*            → SSN Django (Host match, everything else)
+# ============================================================================
+
+name: ssn
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: ssn_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ssn_postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Django Web (Gunicorn + WhiteNoise)
+  # ---------------------------------------------------------------------------
+  # WhiteNoise serves static files directly from Gunicorn with compression
+  # and cache headers. No Nginx needed for static files.
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+      args:
+        UID: ${LOCAL_UID:-1000}
+        GID: ${LOCAL_GID:-1000}
+    image: ssn-web:${PROJECT_VERSION:-latest}
+    container_name: reports_web
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      PYTHONPATH: /app/ssn
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      # Hardcoded: production compose ALWAYS uses production settings
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DEBUG: "False"
+    volumes:
+      - ssn_media:/app/ssn/media
+      - ssn_logs:/app/ssn/logs
+      - ssn_static:/app/static
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-H", "X-Forwarded-Proto: https", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+    networks:
+      - ssn-internal
+      - traefik-public
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+
+      # Router: Host-based routing
+      # SSN catches ALL traffic for SSL_DOMAIN/SSL_IP (except /identity and /mailsender
+      # which are handled by their own PathPrefix routers with higher priority)
+      - "traefik.http.routers.ssn.rule=Host(`${SSL_DOMAIN}`) || Host(`${SSL_IP}`)"
+      - "traefik.http.routers.ssn.entrypoints=web"
+      - "traefik.http.routers.ssn.service=ssn"
+      - "traefik.http.routers.ssn.priority=1"
+
+      # Middlewares
+      - "traefik.http.routers.ssn.middlewares=rate-limit@file"
+
+      # Service: Load balancer
+      - "traefik.http.services.ssn.loadbalancer.server.port=8000"
+
+      # HTTPS Router (uncomment when Traefik has SSL configured)
+      # - "traefik.http.routers.ssn-secure.rule=Host(`${SSL_DOMAIN}`)"
+      # - "traefik.http.routers.ssn-secure.entrypoints=websecure"
+      # - "traefik.http.routers.ssn-secure.tls=true"
+      # - "traefik.http.routers.ssn-secure.service=ssn"
+      # - "traefik.http.routers.ssn-secure.priority=1"
+      # - "traefik.http.routers.ssn-secure.middlewares=rate-limit@file"
+    # CMD from Dockerfile.prod is used: gunicorn with --forwarded-allow-ips=*
+    # entrypoint.sh handles: wait for DB, migrations, superuser creation
+
+volumes:
+  ssn_postgres_data:
+    name: ssn_postgres_data
+  ssn_media:
+    name: ssn_media
+  ssn_logs:
+    name: ssn_logs
+  ssn_static:
+    name: ssn_static
+
+networks:
+  # Internal network for DB communication
+  ssn-internal:
+    driver: bridge
+  # External network for Traefik routing
+  traefik-public:
+    external: true

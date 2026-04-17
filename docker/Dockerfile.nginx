@@ -1,0 +1,18 @@
+# Dockerfile.nginx
+FROM nginx:alpine
+
+LABEL maintainer="admin@example.com"
+
+# 1. Instala herramientas necesarias
+RUN apk add --no-cache openssl certbot
+
+# 2. Copia el entrypoint
+COPY docker/nginx/nginx-entrypoint.sh /usr/local/bin/nginx-entrypoint.sh
+RUN chmod +x /usr/local/bin/nginx-entrypoint.sh
+
+# 3. Copia el template de config (SSL version)
+COPY docker/nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
+
+# 4. Setea el entrypoint
+ENTRYPOINT ["/usr/local/bin/nginx-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación SSN Confirmada</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;padding:32px 0;">
+  <tr>
+    <td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+
+        <!-- Header verde (éxito) -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#059669,#10b981);padding:28px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <p style="margin:0;color:#a7f3d0;font-size:12px;text-transform:uppercase;letter-spacing:1px;">{{ company_name }}</p>
+                  <h1 style="margin:6px 0 0;color:#ffffff;font-size:22px;font-weight:700;">
+                    Presentación Confirmada ✓
+                  </h1>
+                </td>
+                <td align="right" style="padding-left:16px;">
+                  <div style="background:rgba(255,255,255,0.2);border-radius:50%;width:48px;height:48px;display:inline-block;text-align:center;line-height:48px;">
+                    <span style="font-size:24px;">✅</span>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Datos de la presentación -->
+        <tr>
+          <td style="padding:24px 32px 8px;">
+            <p style="margin:0 0 16px;color:#374151;font-size:15px;line-height:1.6;">
+              La presentación <strong>{{ tipo_entrega }} — {{ cronograma }}</strong>
+              fue enviada y confirmada correctamente en la SSN.
+            </p>
+
+            <!-- Tabla de resumen -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+              <tr style="background:#f9fafb;">
+                <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;width:45%;">Tipo de entrega</td>
+                <td style="padding:10px 16px;font-size:13px;color:#111827;border-bottom:1px solid #e5e7eb;">{{ tipo_entrega }}</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;">Cronograma</td>
+                <td style="padding:10px 16px;font-size:13px;color:#111827;border-bottom:1px solid #e5e7eb;">{{ cronograma }}</td>
+              </tr>
+              <tr style="background:#f9fafb;">
+                <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#6b7280;border-bottom:1px solid #e5e7eb;">Estado</td>
+                <td style="padding:10px 16px;font-size:13px;border-bottom:1px solid #e5e7eb;">
+                  <span style="display:inline-block;background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:0.5px;">
+                    {{ estado }}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#6b7280;">Total operaciones</td>
+                <td style="padding:10px 16px;font-size:13px;color:#111827;">{{ total_operaciones }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Desglose por tipo de operación -->
+        {% if tipos_operacion %}
+        <tr>
+          <td style="padding:16px 32px 8px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Desglose de operaciones</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+              {% for tipo, cantidad in tipos_operacion.items %}
+              <tr {% if not forloop.last %}style="border-bottom:1px solid #e5e7eb;"{% endif %}>
+                <td style="padding:9px 16px;font-size:13px;color:#374151;{% if forloop.first %}{% else %}{% endif %}">{{ tipo }}</td>
+                <td style="padding:9px 16px;font-size:13px;color:#111827;font-weight:600;text-align:right;">{{ cantidad }}</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+
+        <!-- Mensaje de la SSN -->
+        {% if ssn_message %}
+        <tr>
+          <td style="padding:16px 32px 8px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">Respuesta de la SSN</p>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #22c55e;border-radius:4px;padding:12px 16px;">
+              <p style="margin:0;font-size:13px;color:#166534;font-style:italic;">{{ ssn_message }}</p>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+
+        <!-- CTA -->
+        {% if url_solicitud %}
+        <tr>
+          <td style="padding:20px 32px 28px;" align="center">
+            <a href="{{ url_solicitud }}"
+               style="display:inline-block;background:#059669;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:6px;">
+              Ver detalle de la presentación
+            </a>
+          </td>
+        </tr>
+        {% endif %}
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:18px 32px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#9ca3af;">
+              Este es un mensaje automático de <strong>{{ company_name }}</strong>.<br>
+              No responder a este correo.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

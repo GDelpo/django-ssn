@@ -1,0 +1,30 @@
+{% comment %}
+  Componente para el encabezado de una tarjeta o sección.
+  Muestra un título, un subtítulo opcional y una lista de botones a la derecha.
+  Es flexible y se adapta a la cantidad de botones.
+
+  Variables que acepta:
+    - title: (Obligatorio) El título principal.
+    - header_buttons: (Opcional) Una lista de diccionarios para renderizar
+                      botones. Cada diccionario debe tener la estructura que
+                      espera el componente 'componentes/link_button.html'.
+{% endcomment %}
+
+{% load component_tags %}
+
+<div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300">
+  <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-transparent border-b border-blue-100 flex flex-col sm:flex-row items-center gap-6">
+    <div class="w-full sm:w-4/5 min-w-0 text-center sm:text-left">
+      <h2 class="text-xl font-bold text-blue-600 truncate">{{ title }}</h2>
+    </div>
+    {% if header_buttons %}
+      <div class="w-full sm:w-1/5">
+        <div class="flex flex-col sm:flex-wrap sm:justify-end gap-2">
+          {% for button in header_buttons %}
+            {% link_button href=button.href label=button.label icon=button.icon color=button.color %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>

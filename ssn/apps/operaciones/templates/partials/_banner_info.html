@@ -1,0 +1,168 @@
+{% comment %}
+  Banner contextual según el estado de la solicitud.
+  
+  Estados SSN soportados:
+  - BORRADOR: Creado localmente, aún no enviado
+  - CARGADO: Enviado a SSN sin confirmar (editable)
+  - PRESENTADO: Confirmado en SSN (solicitar rectificación para editar)
+  - RECTIFICACION_PENDIENTE: Esperando aprobación de SSN
+  - A_RECTIFICAR: SSN aprobó, puede editar y reenviar
+{% endcomment %}
+{% if base_request %}
+  {# --- Banner para PRESENTADO (confirmado en SSN) --- #}
+  {% if base_request.estado == 'PRESENTADO' %}
+    {% url 'operaciones:lista_operaciones' uuid=base_request.uuid as rectify_action_url %}
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6">
+      <div class="px-6 py-4 bg-gradient-to-r from-green-100 to-transparent border-b border-green-100 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        
+        <div class="w-full sm:w-4/5 min-w-0 text-center sm:text-left">
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="flex-shrink-0">
+              <i class="fas fa-check-circle text-3xl text-green-700"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-green-800 text-base">Entrega Presentada</h3>
+              <p class="text-sm text-green-700 mt-1 text-pretty">
+                Confirmada en SSN el <strong>{{ base_request.send_at|date:"d/m/Y" }}</strong>. 
+                Para modificarla, solicite rectificación a la SSN.
+              </p>
+              {% if base_request.respuestas.first %}
+                {% url 'operaciones:solicitud_respuesta' uuid=base_request.uuid as resp_url %}
+                <div class="mt-2">
+                  <a href="{{ resp_url }}" class="inline-flex items-center gap-2 text-sm font-semibold bg-green-200 text-green-800 hover:bg-green-300 rounded-full px-3 py-1 transition-colors">
+                    <i class="fas fa-history"></i>
+                    <span>Ver Historial</span>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-1/5 mt-4 sm:mt-0">
+          <div class="flex justify-center sm:justify-end">
+            <form method="POST" action="{{ rectify_action_url }}" class="w-full sm:w-auto">
+              {% csrf_token %}
+              <input type="hidden" name="rectify_action" value="1">
+              {% include "componentes/button.html" with type="submit" label="Solicitar Rectificación" icon="fas fa-edit" color="warning" %}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {# --- Banner para RECTIFICACION_PENDIENTE (esperando aprobación SSN) --- #}
+  {% elif base_request.estado == 'RECTIFICACION_PENDIENTE' %}
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6">
+      <div class="px-6 py-4 bg-gradient-to-r from-orange-100 to-transparent border-b border-orange-100 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        
+        <div class="w-full sm:w-4/5 min-w-0 text-center sm:text-left">
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="flex-shrink-0">
+              <i class="fas fa-clock text-3xl text-orange-700"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-orange-800 text-base">Rectificación Pendiente</h3>
+              <p class="text-sm text-orange-700 mt-1 text-pretty">
+                Aguardando aprobación de la SSN. <strong>No se puede editar hasta que sea aprobada.</strong>
+              </p>
+              <div class="mt-2">
+                <button onclick="location.reload()" class="inline-flex items-center gap-2 text-sm font-semibold bg-orange-200 text-orange-800 hover:bg-orange-300 rounded-full px-3 py-1 transition-colors">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Actualizar Estado</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {# --- Banner para A_RECTIFICAR (aprobado, puede editar) --- #}
+  {% elif base_request.estado == 'A_RECTIFICAR' %}
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6">
+      <div class="px-6 py-4 bg-gradient-to-r from-yellow-100 to-transparent border-b border-yellow-200 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        
+        <div class="w-full sm:w-4/5 min-w-0 text-center sm:text-left">
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="flex-shrink-0">
+              <i class="fas fa-pencil-alt text-3xl text-yellow-800"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-yellow-800 text-base">Modo de Rectificación</h3>
+              <p class="text-sm text-yellow-700 mt-1 text-pretty">
+                Rectificación aprobada por SSN. <strong>Edite las operaciones y envíe nuevamente.</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-1/5 mt-4 sm:mt-0">
+          <div class="flex justify-center sm:justify-end">
+            {% if request.resolver_match.url_name == 'lista_operaciones' %}
+              {% url 'operaciones:lista_operaciones' uuid=base_request.uuid as cancel_action_url %}
+              <form id="cancelRectifyForm" method="POST" action="{{ cancel_action_url }}" class="w-full sm:w-auto">
+                {% csrf_token %}
+                <input type="hidden" name="cancel_rectify_action" value="1">
+                {% include "componentes/button.html" with type="submit" label="Cancelar" icon="fas fa-times" color="danger" %}
+              </form>
+            {% else %}
+              {% url 'operaciones:lista_operaciones' uuid=base_request.uuid as list_url %}
+              {% include "componentes/link_button.html" with href=list_url label="Volver al Listado" icon="fas fa-chevron-left" color="secondary" %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% if request.resolver_match.url_name == 'lista_operaciones' %}
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const cancelForm = document.getElementById('cancelRectifyForm');
+          if (cancelForm) {
+            cancelForm.addEventListener('submit', function(event) {
+              const hasChanges = {{ has_changes|yesno:"true,false" }};
+              if (hasChanges) {
+                const confirmed = confirm("Se han detectado cambios. ¿Estás seguro de que quieres cancelar y perderlos?");
+                if (!confirmed) {
+                  event.preventDefault();
+                }
+              }
+            });
+          }
+        });
+      </script>
+    {% endif %}
+
+  {# --- Banner para CARGADO (enviado pero sin confirmar) --- #}
+  {% elif base_request.estado == 'CARGADO' %}
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6">
+      <div class="px-6 py-4 bg-gradient-to-r from-blue-100 to-transparent border-b border-blue-100 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        
+        <div class="w-full sm:w-4/5 min-w-0 text-center sm:text-left">
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <div class="flex-shrink-0">
+              <i class="fas fa-upload text-3xl text-blue-700"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-blue-800 text-base">Datos Cargados (Sin Confirmar)</h3>
+              <p class="text-sm text-blue-700 mt-1 text-pretty">
+                Los datos fueron enviados a SSN pero <strong>aún no están confirmados</strong>. Puede continuar editando.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-1/5 mt-4 sm:mt-0">
+          <div class="flex justify-center sm:justify-end">
+            <span class="inline-flex items-center gap-2 text-sm font-semibold bg-blue-200 text-blue-800 rounded-full px-3 py-1">
+              <i class="fas fa-info-circle"></i>
+              <span>Editable</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% endif %}
+{% endif %}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas de Vencimientos SSN</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #1a1a1a;
+            font-size: 24px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat {
+            text-align: center;
+            padding: 12px 20px;
+            border-radius: 6px;
+        }
+        .stat-danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .stat-warning {
+            background: #fffbeb;
+            color: #d97706;
+        }
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .alert {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+        }
+        .alert-danger {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+        .alert-warning {
+            background: #fffbeb;
+            border-color: #d97706;
+        }
+        .alert-info {
+            background: #eff6ff;
+            border-color: #2563eb;
+        }
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .alert-message {
+            color: #555;
+            font-size: 14px;
+        }
+        .alert-cronograma {
+            display: inline-block;
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .cta {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .cta a {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Alertas de Vencimientos</h1>
+            <p style="color: #666; margin-top: 8px;">{{ company_name }}</p>
+        </div>
+        
+        <div class="stats">
+            {% if alertas_criticas > 0 %}
+            <div class="stat stat-danger">
+                <div class="stat-number">{{ alertas_criticas }}</div>
+                <div class="stat-label">Vencidas</div>
+            </div>
+            {% endif %}
+            <div class="stat stat-warning">
+                <div class="stat-number">{{ total_alertas }}</div>
+                <div class="stat-label">Total Pendientes</div>
+            </div>
+        </div>
+        
+        <div class="alerts">
+            {% for alerta in alertas %}
+            <div class="alert {% if alerta.level.value == 'danger' %}alert-danger{% elif alerta.level.value == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+                <div class="alert-title">{{ alerta.title }}</div>
+                <div class="alert-message">{{ alerta.message }}</div>
+                <span class="alert-cronograma">📅 {{ alerta.cronograma }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if base_url %}
+        <div class="cta">
+            <a href="{{ base_url }}">Ir al Sistema</a>
+        </div>
+        {% endif %}
+        
+        <div class="footer">
+            <p>Este es un email automático generado por el Sistema de Operaciones SSN.</p>
+            <p>Por favor, no responda a este mensaje.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% extends "partials/_base_layout.html" %}
+
+{% block main_content_operaciones %}
+  <div>
+    {% block list_content %}{% endblock %}
+    {% if request.resolver_match.url_name == 'lista_solicitudes' %}
+      <small class="text-gray-800">* Las solicitudes <strong class="italic">"Presentadas"</strong> sin respuesta provienen de la plataforma anterior.</small>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block after_main_content_operaciones %}
+  {% if page_obj %}
+    {% include "lists/partials/_pagination.html" %}
+  {% endif %}
+{% endblock %}

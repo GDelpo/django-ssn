@@ -1,0 +1,46 @@
+{% extends "partials/_base_layout.html" %}
+{% load component_tags %}
+{% block main_content_operaciones %}
+  <div class="overflow-x-auto">
+      <h3 class="text-lg font-bold text-blue-600 truncate mb-6">Indentificador: <span id="uuidSolicitud" class="font-medium text-blue-800 italic cursor-pointer hover:text-blue-600 hover:underline transition duration-200">{{base_request.uuid}}</span></h3>
+      <!-- Área para mostrar el JSON formateado, con altura máxima y scroll -->
+      <div class="mb-3">
+        <pre id="jsonContent" style="background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; max-height: 400px; overflow-y: auto;">
+          {{ formatted_json }}
+        </pre>
+      </div>
+      <!-- Botones para copiar y enviar por mail, en grid con separación -->
+      <div class="grid grid-cols-1 gap-6 mb-3 sm:grid-cols-2">
+        {% include "componentes/button.html" with id="copyButton" href=edit_url icon="fas fa-copy" label="Copiar JSON" color="primary" %}
+        {% link_button href=mailto_link icon="fas fa-share" label="Enviar por mail" color="warning" %}
+      </div>
+      <div class="grid grid-cols-1 gap-6">
+        {% link_button href=excel_link icon="fas fa-file-arrow-down" label="Descargar <strong>.xlsx</strong>" color="success"  %}
+      </div>
+    </div>
+    {% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    initConfirmButton(
+      'enviarSolicitud',
+      '¿Estás seguro de que quieres enviar la solicitud?'
+    );
+
+    initCopyToClipboard(
+      'copyButton',
+      'jsonContent',
+      'JSON copiado al portapapeles',
+      'Error al copiar el JSON'
+    );
+
+    initCopyToClipboard(
+      'uuidSolicitud',
+      'uuidSolicitud',
+      'UUID copiado al portapapeles',
+      'Error al copiar el UUID'
+    );
+  });
+</script>
+{% endblock %}

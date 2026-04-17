@@ -1,0 +1,146 @@
+{% extends "lists/partials/_base_list.html" %}
+{% load component_tags %}
+
+{% block list_content %}
+  {# Incluir filtros #}
+  {% if filter_form %}
+    {% include "lists/partials/_filters.html" %}
+  {% endif %}
+
+  <table class="min-w-full table-auto divide-y divide-gray-200 bg-white rounded-lg overflow-hidden shadow-sm block md:table">
+        <caption class="sr-only">{{ title }}</caption>
+        <thead role="rowgroup" class="hidden md:table-header-group bg-gradient-to-r from-blue-50 to-white divide-y divide-gray-200">
+          <tr role="row" class="block md:table-row">
+            <th role="columnheader" class="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+              <a href="?{% if query_params %}{{ query_params }}&{% endif %}orden={% if current_orden == 'tipo_entrega' %}-tipo_entrega{% else %}tipo_entrega{% endif %}" 
+                 class="hover:text-blue-600 inline-flex items-center gap-1">
+                Tipo de Entrega
+                {% if current_orden == 'tipo_entrega' %}
+                  <i class="fas fa-sort-up text-blue-500"></i>
+                {% elif current_orden == '-tipo_entrega' %}
+                  <i class="fas fa-sort-down text-blue-500"></i>
+                {% else %}
+                  <i class="fas fa-sort text-gray-300"></i>
+                {% endif %}
+              </a>
+            </th>
+            <th role="columnheader" class="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+              <a href="?{% if query_params %}{{ query_params }}&{% endif %}orden={% if current_orden == 'cronograma' %}-cronograma{% else %}cronograma{% endif %}" 
+                 class="hover:text-blue-600 inline-flex items-center gap-1">
+                Cronograma
+                {% if current_orden == 'cronograma' %}
+                  <i class="fas fa-sort-up text-blue-500"></i>
+                {% elif current_orden == '-cronograma' %}
+                  <i class="fas fa-sort-down text-blue-500"></i>
+                {% else %}
+                  <i class="fas fa-sort text-gray-300"></i>
+                {% endif %}
+              </a>
+            </th>
+            <th role="columnheader" class="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+              <a href="?{% if query_params %}{{ query_params }}&{% endif %}orden={% if current_orden == '-created_at' %}created_at{% else %}-created_at{% endif %}" 
+                 class="hover:text-blue-600 inline-flex items-center gap-1">
+                Fecha de Creación
+                {% if current_orden == 'created_at' %}
+                  <i class="fas fa-sort-up text-blue-500"></i>
+                {% elif current_orden == '-created_at' %}
+                  <i class="fas fa-sort-down text-blue-500"></i>
+                {% else %}
+                  <i class="fas fa-sort text-gray-300"></i>
+                {% endif %}
+              </a>
+            </th>
+            <th role="columnheader" class="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">Estado</th>
+            <th role="columnheader" class="px-2 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">Respuesta</th>
+            <th role="columnheader" class="px-2 py-2 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">Acciones</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup" class="block md:table-row-group divide-y divide-gray-200">
+          {% for solicitud in solicitudes %}
+            <tr role="row" class="bg-white odd:bg-gray-50 hover:bg-blue-50 block md:table-row border-b md:border-0 transition-colors">
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-left" data-label="Tipo de Entrega">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Tipo de Entrega</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                  {{ solicitud.tipo_entrega }}
+                </div>
+              </td>
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-left" data-label="Cronograma">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Cronograma</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  <i class="fas fa-calendar-week text-gray-400 mr-2"></i>
+                  {{ solicitud.cronograma }}
+                </div>
+              </td>
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-left" data-label="Fecha de Creación">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Fecha de Creación</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  <i class="fas fa-clock text-gray-400 mr-2"></i>
+                  {{ solicitud.created_at|date:"d/m/Y" }}&nbsp;<small class="text-tiny">({{ solicitud.created_at|date:"H:i" }})</small>
+                </div>
+              </td>
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-left" data-label="Estado">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Estado</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  {% if solicitud.estado == 'PRESENTADO' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <i class="fas fa-check-circle mr-0.5"></i>Presentado&nbsp;<small class="text-tiny">({{ solicitud.send_at|date:"d/m/Y" }})</small>
+                    </span>
+                  {% elif solicitud.estado == 'RECTIFICACION_PENDIENTE' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      <i class="fas fa-clock mr-0.5"></i>Rect. Pendiente
+                    </span>
+                  {% elif solicitud.estado == 'A_RECTIFICAR' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <i class="fas fa-pencil-alt mr-0.5"></i>A Rectificar
+                    </span>
+                  {% elif solicitud.estado == 'CARGADO' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <i class="fas fa-upload mr-0.5"></i>Cargado
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <i class="fas fa-file mr-0.5"></i>Borrador
+                    </span>
+                  {% endif %}
+                </div>
+              </td>
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-left" data-label="Respuesta">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Respuesta</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  {% url 'operaciones:solicitud_respuesta' uuid=solicitud.uuid as resp_url %}  
+                  {% if solicitud.tiene_error %}
+                    <a href="{{ resp_url }}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 hover:underline">
+                      <i class="fas fa-times-circle mr-0.5"></i>Error
+                    </a>
+                  {% elif solicitud.respuestas.first %}
+                    <a href="{{ resp_url }}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:underline">
+                      <i class="fas fa-check-circle mr-0.5"></i>OK
+                    </a>                    
+                  {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <i class="fas fa-minus mr-0.5"></i>
+                    </span>
+                  {% endif %}
+                </div>
+              </td>
+              <td role="gridcell" class="px-2 py-2 md:table-cell block text-sm text-gray-700 text-center md:text-right" data-label="Acciones">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Acciones</span>
+                  {% url 'operaciones:lista_operaciones' uuid=solicitud.uuid as list_ops_url %}
+                  {% link_button href=list_ops_url label="Ver solicitud" icon="fas fa-eye" color="primary" size="sm" %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr role="row" class="block md:table-row">
+              <td role="gridcell" colspan="6" class="px-4 py-8 text-center text-gray-500 md:table-cell">
+                <div class="flex flex-col items-center justify-center">
+                  <i class="fas fa-inbox text-gray-300 text-4xl mb-3"></i>
+                  <p class="text-gray-500">No hay solicitudes registradas.</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+  </table>
+{% endblock %}

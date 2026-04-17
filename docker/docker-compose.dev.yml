@@ -1,0 +1,108 @@
+# ============================================================================
+# SSN Django - Docker Compose (Development)
+# ============================================================================
+#
+# Local development with hot-reload.
+# Django runserver handles static files in DEBUG mode.
+#
+# USAGE:
+#   cd python_django_ssn
+#   docker compose -f docker/docker-compose.dev.yml up -d --build
+#   docker compose -f docker/docker-compose.dev.yml logs -f
+#   docker compose -f docker/docker-compose.dev.yml down
+#
+# ACCESS:
+#   App:    http://localhost:8000
+#   Health: http://localhost:8000/health/
+#
+# TAILWIND (watch mode - in a separate terminal):
+#   docker compose -f docker/docker-compose.dev.yml exec web python ssn/manage.py tailwind start
+# ============================================================================
+
+name: ssn-dev
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: ssn_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ssn_db}
+      POSTGRES_USER: ${POSTGRES_USER:-ssn_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ssn_password}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DB_PORT_EXTERNAL:-5434}:5432"
+    volumes:
+      - ssn_postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-ssn_user}", "-d", "${POSTGRES_DB:-ssn_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Django Web (Development - hot reload)
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        UID: ${LOCAL_UID:-1000}
+        GID: ${LOCAL_GID:-1000}
+    container_name: reports_web
+    env_file:
+      - ../.env
+    environment:
+      PYTHONPATH: /app/ssn
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings.dev}
+      DEBUG: "True"
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      # Mount source for hot reload
+      - ../ssn:/app/ssn:rw
+      - ssn_media:/app/ssn/media
+      - ssn_logs:/app/ssn/logs
+      - ssn_static:/app/static
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # PgAdmin (optional - use profile)
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ssn_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5052}:80"
+    volumes:
+      - ssn_pgadmin_data:/var/lib/pgadmin
+    networks:
+      - ssn-internal
+    profiles:
+      - tools
+
+volumes:
+  ssn_postgres_data:
+  ssn_media:
+  ssn_logs:
+  ssn_static:
+  ssn_pgadmin_data:
+
+networks:
+  ssn-internal:
+    driver: bridge

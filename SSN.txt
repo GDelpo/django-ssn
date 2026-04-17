@@ -1,0 +1,233 @@
+# Especificaciones Técnicas: Régimen Informativo SSN (2025)
+
+Este documento resume los diseños de registros y validaciones para las presentaciones ante la **Superintendencia de Seguros de la Nación**.
+
+---
+
+## 1. Información General de Cabecera
+
+| Campo | Mensual | Semanal |
+| --- | --- | --- |
+| **codigoCompañia** | String (4) - Ej: "9999" 
+
+ | String (4) - Ej: "9999" 
+
+ |
+| **cronograma** | String (7) - Formato: `YYYY-MM` 
+
+ | String (10) - Formato: `YYYY-MM-SX` 
+
+ |
+| **tipoEntrega** | "Mensual" 
+
+ | "Semanal" 
+
+ |
+
+---
+
+## 2. Registro: STOCK INVERSIONES (Títulos, Acciones, FCI)
+
+*Utilizado para tipos de especie: TP, ON, AC, FF, FC, OP*.
+
+| Campo | Tipo / Longitud | Descripción |
+| --- | --- | --- |
+| **stocks.tipo** | String (1) | Identificador de Inversiones ("I").
+
+ |
+| **stocks.tipoEspecie*** | String (2) | Identificador para tipo de especie.
+
+ |
+| **stocks.codigoEspecies** | String | Código de especie según Tabla SSN.
+
+ |
+| **stocks.cantidadDevengadoEspecies** | Number (14,6) | 6 decimales para FC; resto solo enteros.
+
+ |
+| **stocks.cantidadPercibidoEspecies** | Number (14,6) | 6 decimales para FC; resto solo enteros.
+
+ |
+| **stocks.codigoAfectacion** | Number (3) | Ver tabla Afectación.
+
+ |
+| **stocks.tipovaluacion** | String (1) | "T" (Técnico) o "V" (Mercado).
+
+ |
+| **stocks.conCotizacion** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.libreDisponibilidad** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.emisorGrupoEconomico** | Number (1) | 1: Si (Pertenece), 0: No.
+
+ |
+| **stocks.emisorArtRet** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.previsionDesvalorizacion** | Number (14) | Monto de previsión.
+
+ |
+| **stocks.valorContable** | Number (14) | Valor contable de la especie.
+
+ |
+| **stocks.fechaPaseVT** | String (8) | Solo Mensual: Fecha pase a V. Técnico (ddmmaaaa).
+
+ |
+| **stocks.precioPaseVT** | Number (6,2) | Solo Mensual: Precio pase a V. Técnico.
+
+ |
+| **stocks.enCustodia** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.financiera** | Number (1) | Solo Mensual: Expone en financiera (1: Si, 0: No).
+
+ |
+| **stocks.valorFinanciero** | Number (14) | Solo Mensual: Valor financiero/cotización.
+
+ |
+
+---
+
+## 3. Registro: STOCK PLAZO FIJO
+
+*Declaración de depósitos a plazo*.
+
+| Campo | Tipo / Longitud | Descripción |
+| --- | --- | --- |
+| **stocks.tipo** | String (1) | Identificador de Plazo Fijo ("P").
+
+ |
+| **stocks.tipoPF** | String (3) | Ver tabla Tipo de Depósito.
+
+ |
+| **stocks.bic** | String (12) | Código BIC del banco.
+
+ |
+| **stocks.cdf** | String (20) | Certificado del depósito.
+
+ |
+| **stocks.fechaConstitucion** | String (8) | Formato: ddmmaaaa.
+
+ |
+| **stocks.fechaVencimiento** | String (8) | Formato: ddmmaaaa.
+
+ |
+| **stocks.moneda** | String (3) | Ver tabla Moneda.
+
+ |
+| **stocks.valorNominalOrigen** | Number (10) | Nominal moneda origen (vacio si es ARS).
+
+ |
+| **stocks.valorNominalNacional** | Number (10) | Nominal en Pesos Argentinos.
+
+ |
+| **stocks.emisorGrupoEconomico** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.libreDisponibilidad** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.enCustodia** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.codigoAfectacion** | Number (3) | Ver tabla Afectaciones.
+
+ |
+| **stocks.tipoTasa** | String (1) | "F" (Fija) o "V" (Variable).
+
+ |
+| **stocks.tasa** | Number (2,3) | 2 enteros, 3 decimales.
+
+ |
+| **stocks.tituloDeuda** | Number (1) | Solo Mensual: Relación con deuda pública (1/0).
+
+ |
+| **stocks.codigoTitulo** | String (3) | Solo Mensual: Código título público.
+
+ |
+| **stocks.valorContable** | Number (10) | Valor contable del plazo fijo.
+
+ |
+| **stocks.financiera** | Number (1) | Solo Mensual: Expone en financiera (1/0).
+
+ |
+
+---
+
+## 4. Registro: STOCK CHEQUE PAGO DIFERIDO
+
+*Instrumentos de SGR y cheques de pago diferido*.
+
+| Campo | Tipo / Longitud | Descripción |
+| --- | --- | --- |
+| **stocks.tipo*** | String (1) | Identificador Cheque ("C").
+
+ |
+| **stocks.CodigoSGR** | String (3) | Ver tabla Tipo de SGR.
+
+ |
+| **stocks.CodigoCheque** | String (16) | Código de Bolsa de Valores.
+
+ |
+| **stocks.FechaEmision** | String (8) | Formato: ddmmaaaa.
+
+ |
+| **stocks.FechaVencimiento** | String (8) | Formato: ddmmaaaa.
+
+ |
+| **stocks.moneda** | String (3) | Ver tabla Moneda.
+
+ |
+| **stocks.valorNominal** | Number (10) | Valor nominal del cheque.
+
+ |
+| **stocks.valorAdquisicion** | Number (10) | Valor de adquisición.
+
+ |
+| **stocks.grupoEconomico** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.libreDisponibilidad** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.enCustodia** | Number (1) | 1: Si, 0: No.
+
+ |
+| **stocks.codigoAfectacion** | String (3) | Ver tabla Afectaciones.
+
+ |
+| **stocks.tipoTasa** | String (1) | "F" (Fija) o "V" (Variable).
+
+ |
+| **stocks.tasa** | Number (2,3) | Tasa aplicada (2 enteros, 3 decimales).
+
+ |
+| **stocks.valorContable** | Number (10) | Valor contable del cheque.
+
+ |
+| **stocks.financiera** | Number (1) | Solo Mensual: Expone en financiera (1/0).
+
+ |
+| **stocks.fechaAdquisicion** | String (8) | Fecha de adquisición (ddmmaaaa).
+
+ |
+
+---
+
+## 5. Notas Importantes para el Desarrollo
+
+* 
+**Separadores de Decimales:** Los campos numéricos con decimales (como la tasa o cantidades devengadas) deben utilizar coma para separar decimales en las especificaciones, aunque el JSON de ejemplo los muestra con punto para Number types.
+
+
+* 
+**Campos Condicionales:** Muchos campos (como `stocks.financiera` o `stocks.valorFinanciero`) son exclusivos del régimen **Mensual** y no aparecen en las tablas del registro **Semanal**.
+
+
+* 
+**Estructura del JSON:** La raíz contiene los datos de la compañía y el cronograma, y un array llamado `"STOCKS"` que contiene los objetos de inversión.
+
+
+* 
+**Los campos numéricos que indiquen por ejemplo 6,2 son hasta 6 enteros y 2 decimales. Lo cual indica que para ese campo deberá informarse  con esas cantidades máximas , separados por coma, lo cual hace un total de hasta 9 posiciones.

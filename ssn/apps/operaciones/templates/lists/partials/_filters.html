@@ -1,0 +1,79 @@
+{% comment %}
+Filtros para listados de solicitudes.
+Usa el formulario filter_form pasado desde la vista.
+{% endcomment %}
+
+<div class="mb-4 bg-white/70 border border-gray-200 rounded-lg shadow-sm p-4">
+  <details class="group" {% if request.GET.tipo_entrega or request.GET.estado or request.GET.anio %}open{% endif %}>
+    <summary class="flex items-center cursor-pointer">
+      <span class="text-lg font-bold text-blue-600 truncate flex items-center">
+        <i class="fas fa-filter text-blue-500 mr-2"></i>
+        Filtros y Ordenamiento
+        {% if request.GET.tipo_entrega or request.GET.estado or request.GET.anio %}
+          <span class="ml-2 inline-flex items-center px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+            Activos
+          </span>
+        {% endif %}
+      </span>
+      <span class="ml-auto transition-transform group-open:rotate-180">
+        <i class="fas fa-chevron-down"></i>
+      </span>
+    </summary>
+
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <form method="get" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {# Tipo de Entrega #}
+          <div>
+            <label for="{{ filter_form.tipo_entrega.id_for_label }}" 
+                   class="block text-sm font-medium text-gray-700 mb-1">
+              {{ filter_form.tipo_entrega.label }}
+            </label>
+            {{ filter_form.tipo_entrega }}
+          </div>
+
+          {# Estado #}
+          <div>
+            <label for="{{ filter_form.estado.id_for_label }}" 
+                   class="block text-sm font-medium text-gray-700 mb-1">
+              {{ filter_form.estado.label }}
+            </label>
+            {{ filter_form.estado }}
+          </div>
+
+          {# Año #}
+          <div>
+            <label for="{{ filter_form.anio.id_for_label }}" 
+                   class="block text-sm font-medium text-gray-700 mb-1">
+              {{ filter_form.anio.label }}
+            </label>
+            {{ filter_form.anio }}
+          </div>
+
+          {# Ordenamiento #}
+          <div>
+            <label for="{{ filter_form.orden.id_for_label }}" 
+                   class="block text-sm font-medium text-gray-700 mb-1">
+              {{ filter_form.orden.label }}
+            </label>
+            {{ filter_form.orden }}
+          </div>
+        </div>
+
+        {# Botones de acción #}
+        <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-100">
+          <button type="submit" 
+                  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="fas fa-search mr-2"></i>
+            Aplicar
+          </button>
+          <a href="{% url 'operaciones:lista_solicitudes' %}" 
+             class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm transition-colors">
+            <i class="fas fa-times mr-2"></i>
+            Limpiar
+          </a>
+        </div>
+      </form>
+    </div>
+  </details>
+</div>

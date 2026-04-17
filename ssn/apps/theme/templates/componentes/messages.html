@@ -1,0 +1,95 @@
+{% if messages and request.user.is_authenticated %}
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col items-end max-w-sm space-y-4">
+    {% for message in messages %}
+      <div class="flex items-center space-x-4 p-4 shadow-lg rounded-md text-sm font-medium transition-all transform translate-x-0 duration-300 ease-out
+                  {% if 'success' in message.tags %} bg-green-100 text-green-700 hover:bg-green-200 border-l-4 border-green-500
+                  {% elif 'error' in message.tags %}  bg-red-100 text-red-700 hover:bg-red-200 border-l-4 border-red-500
+                  {% elif 'warning' in message.tags %}  bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-l-4 border-yellow-500
+                  {% elif 'info' in message.tags %}  bg-blue-100 text-blue-700 hover:bg-blue-200 border-l-4 border-blue-500
+                  {% else %}  bg-gray-100 text-gray-700 hover:bg-gray-200 border-l-4 border-gray-500
+                  {% endif %}">
+        {% if 'success' in message.tags %}
+          <i class="fas fa-check-circle"></i>
+        {% elif 'error' in message.tags %}
+          <i class="fas fa-exclamation-triangle"></i>
+        {% elif 'warning' in message.tags %}
+          <i class="fas fa-exclamation-circle"></i>
+        {% elif 'info' in message.tags %}
+          <i class="fas fa-info-circle"></i>
+        {% else %}
+          <i class="fas fa-bell"></i>
+        {% endif %}
+        <span class="flex-1">{{ message }}</span>
+        <button type="button" class="toast-close ml-2 text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+  // Animación mejorada para toasts
+    document.addEventListener('DOMContentLoaded', function() {
+      const toasts = document.querySelectorAll('#toast-container > div');
+
+    // Animación de entrada para cada toast
+      toasts.forEach(function(toast, index) {
+      // Aplica un retraso breve y escalonado para cada toast
+        setTimeout(() => {
+          toast.classList.add('animate-fadeIn');
+        }, index * 100);
+
+      // Configurar temporizador para ocultar después de 5 segundos
+        setTimeout(function() {
+          toast.classList.add('animate-fadeOut');
+          setTimeout(function(){
+            toast.remove();
+          }, 500);
+        }, 5000 + (index * 100));
+      });
+
+    // Agregar event listeners para los botones de cierre
+      document.querySelectorAll('.toast-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const toast = this.closest('div');
+          toast.classList.add('animate-fadeOut');
+          setTimeout(function(){
+            toast.remove();
+          }, 300);
+        });
+      });
+    });
+  </script>
+
+  <style>
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .animate-fadeOut {
+      animation: fadeOut 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+  </style>
+{% endif %}

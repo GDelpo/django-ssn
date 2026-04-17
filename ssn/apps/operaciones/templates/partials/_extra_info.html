@@ -1,0 +1,23 @@
+<div class="max-w-3xl mx-auto mb-6">
+  <div class="bg-white/50 backdrop-blur-sm border border-blue-100 rounded-lg shadow-sm p-4">
+    <div class="flex flex-wrap items-center justify-around gap-6">
+      {% for key, value in extra_info %}
+        {% if key == "Operaciones" %}
+          {% if value > 0 and request.resolver_match.url_name != 'lista_operaciones' and request.resolver_match.url_name != 'preview_operaciones'%}
+          <div class="w-full sm:w-auto text-center sm:text-right">
+            <a href="{% url 'operaciones:lista_operaciones' uuid=base_request.uuid %}" class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+              <i class="fas fa-list mr-1"></i>
+              {{ value }} operación{{ value|pluralize:"es" }}
+            </a>
+          </div>
+          {% endif %}
+        {% else %}
+          <div class="flex flex-col sm:flex-row sm:items-center text-center sm:text-left">
+            <span class="text-sm font-medium text-gray-500 uppercase sm:mr-1">{{ key }}:</span>
+            <span class="text-sm font-semibold text-blue-600">{{ value }}</span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>

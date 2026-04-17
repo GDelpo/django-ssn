@@ -1,0 +1,72 @@
+# HTTP
+server {
+    listen ${NGINX_PORT_HTTP};
+    server_name ${SSL_DOMAIN} ${SSL_IP};
+
+    # ACME challenge para Certbot
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Redirigir todo a HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# HTTPS
+server {
+    listen ${NGINX_PORT_HTTPS} ssl;
+    server_name ${SSL_DOMAIN} ${SSL_IP};
+    
+    # Tamaño de subida de archivos
+    client_max_body_size 20M;
+
+    # Certificados
+    ssl_certificate /etc/letsencrypt/live/${SSL_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SSL_DOMAIN}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
+    location /static/ {
+        alias /app/static/;
+        access_log off;
+        expires 1y;
+        add_header Cache-Control "public";
+    }
+
+    location /media/ {
+        alias /app/ssn/media/;
+    }
+
+    location / {
+        # WEB_UPSTREAM: usar "web:8000" con bridge network, "127.0.0.1:8000" con host network
+        proxy_pass http://${WEB_UPSTREAM};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Healthcheck
+    location /health/ {
+        access_log off;
+        return 200 "OK";
+    }
+
+    # Nginx status (ajustar IPs si querés)
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 198.51.100.0/24;
+        allow 192.0.2.0/24;
+        allow 127.0.0.1;
+        deny all;
+    }
+}

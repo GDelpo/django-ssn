@@ -1,0 +1,167 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <!-- Page Title -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Mi Perfil</h1>
+    <p class="text-gray-600 mt-2">Gestiona tu información personal y preferencias</p>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <!-- Header with user info -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
+      <div class="flex items-center space-x-4">
+        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-xl font-semibold text-blue-600">
+          {{ user.first_name|first }}{{ user.last_name|first }}
+        </div>
+        <div class="text-white">
+          <h2 class="text-2xl font-bold">{{ user.get_full_name }}</h2>
+          <p class="text-blue-100">{{ user.email }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="px-6 py-8 space-y-6">
+      <!-- Basic Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+          <p class="text-gray-900">{{ user.first_name }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+          <p class="text-gray-900">{{ user.last_name }}</p>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <p class="text-gray-900">{{ user.email }}</p>
+        </div>
+      </div>
+
+      <!-- Status Information -->
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Estado de la Cuenta</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <div class="flex items-center space-x-2">
+              {% if user.is_active %}
+                <span class="h-3 w-3 bg-green-500 rounded-full"></span>
+                <p class="text-gray-900">Activo</p>
+              {% else %}
+                <span class="h-3 w-3 bg-red-500 rounded-full"></span>
+                <p class="text-gray-900">Inactivo</p>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Último Inicio</label>
+            <p class="text-gray-900">
+              {% if user.last_login %}
+                {{ user.last_login|date:"d/m/Y H:i" }}
+              {% else %}
+                Nunca
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Autenticación</label>
+            <p class="text-gray-900">
+              {% if user.is_external_user %}
+                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                  Servicio de Identidad
+                </span>
+              {% else %}
+                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                  Base de Datos Local
+                </span>
+              {% endif %}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Usuario Crear</label>
+            <p class="text-gray-900">{{ user.created_at|date:"d/m/Y H:i" }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions (if user has any) -->
+      {% if user.user_permissions.exists or user.groups.exists %}
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Permisos y Roles</h3>
+        
+        {% if user.groups.exists %}
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Grupos</label>
+          <div class="flex flex-wrap gap-2">
+            {% for group in user.groups.all %}
+              <span class="inline-block bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">
+                {{ group.name }}
+              </span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if user.is_staff %}
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Roles Especiales</label>
+          <div class="flex flex-wrap gap-2">
+            {% if user.is_superuser %}
+              <span class="inline-block bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full">
+                Administrador
+              </span>
+            {% endif %}
+            {% if user.is_staff %}
+              <span class="inline-block bg-orange-100 text-orange-800 text-sm px-3 py-1 rounded-full">
+                Personal
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3">
+      <a href="{% url 'theme:index' %}" class="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition">
+        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al Inicio
+      </a>
+      
+      <form method="post" action="{% url 'auth:logout_all' %}" class="flex-1">
+        {% csrf_token %}
+        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition">
+          <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Cerrar Sesión en Todos los Dispositivos
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+      <h3 class="font-semibold text-blue-900 mb-2">Seguridad</h3>
+      <p class="text-sm text-blue-700 mb-3">Revisa y actualiza tu contraseña regularmente</p>
+      <a href="#" class="text-sm font-semibold text-blue-600 hover:text-blue-700">Cambiar Contraseña →</a>
+    </div>
+
+    <div class="bg-green-50 rounded-lg border border-green-200 p-4">
+      <h3 class="font-semibold text-green-900 mb-2">Dispositivos Activos</h3>
+      <p class="text-sm text-green-700 mb-3">Gestiona tus sesiones activas en otros dispositivos</p>
+      <a href="#" class="text-sm font-semibold text-green-600 hover:text-green-700">Ver Dispositivos →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

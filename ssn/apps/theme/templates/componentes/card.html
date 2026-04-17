@@ -1,0 +1,7 @@
+<div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6 hover:shadow-lg transition-shadow duration-300">
+  {% if title %}
+    {% include "./card_header.html" with title=title header_buttons=header_buttons %}
+  {% endif %}
+
+  {% block card_content %}{% endblock %}
+</div>

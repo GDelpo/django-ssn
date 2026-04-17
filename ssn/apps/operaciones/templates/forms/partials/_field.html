@@ -1,0 +1,28 @@
+{% load component_tags %}
+<div class="{% if special_fields and field.name in special_fields %}md:col-span-2{% else %}col-span-1{% endif %}">
+  <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+    {{ field.label }}
+  </label>
+  {% if field.field.disabled and field|is_numeric_field %}
+    {# Readonly: reemplazar el input por un div con el valor formateado #}
+    <div class="w-full rounded-md border border-gray-300 bg-gray-200 text-gray-600 cursor-not-allowed px-3 py-2 text-sm shadow-sm">
+      {{ field.value|ar_decimal }}
+    </div>
+  {% else %}
+    {{ field }}
+    {% if field|is_numeric_field and field.value %}
+      {# Editable: mostrar referencia formateada debajo del input #}
+      <p class="text-xs text-blue-500 mt-0.5">= {{ field.value|ar_decimal }}</p>
+    {% endif %}
+  {% endif %}
+  {% if field.help_text %}
+    <p class="text-xs text-gray-500">{{ field.help_text }}</p>
+  {% endif %}
+  {% if field.errors %}
+    <ul class="mt-1 text-xs text-red-600">
+      {% for error in field.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

@@ -1,0 +1,80 @@
+{# ssn/apps/operaciones/templates/operaciones/forms/operacion.html #}
+{% extends "forms/partials/_base_form.html" %}
+{% block form_fields %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {# 1) Sección “Información Principal” #}
+    {% include "forms/partials/_seccion_info_principal.html" %}
+
+    {# 2) Sección “Detalles de Operación” #}
+    {% include "forms/partials/_seccion_detalles_operacion.html" %}
+
+    {# 3) Sección “Documentación” #}
+    {% include "forms/partials/_seccion_documentacion.html" %}
+
+    {# 4) Subformularios extra (Detalle A y Detalle B) #}
+    {% if form.detalle_a_form %}
+      <div class="md:col-span-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <h3 class="text-lg font-semibold text-blue-700 mb-3 flex items-center">
+          <i class="fas fa-list-alt mr-2"></i> Detalle A
+          <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100">
+            Información adicional
+          </span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for field in form.detalle_a_form %}
+            {% include "forms/partials/_field.html" with field=field %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if form.detalle_b_form %}
+      <div class="md:col-span-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <h3 class="text-lg font-semibold text-blue-700 mb-3 flex items-center">
+          <i class="fas fa-list-alt mr-2"></i> Detalle B
+          <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100">
+            Información adicional
+          </span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for field in form.detalle_b_form %}
+            {% include "forms/partials/_field.html" with field=field %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block submit_button %}
+  {% include "componentes/button.html" with label=button_text icon="fas fa-save" color="primary" %}
+{% endblock %}
+
+{% block extra_js %}
+  {% if form.tipo_operacion.value == 'V' %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        initToggleFields({
+          triggerId: 'id_tipo_especie',
+          dependentIds: ['id_fecha_pase_vt', 'id_precio_pase_vt'],
+          triggerIdsAlt: ['id_tipo_valuacion'],
+          shouldShowFn: function(especie, valuacion) {
+            return (especie === 'TP' || especie === 'ON') && valuacion === 'T';
+          }
+        });
+      });
+    </script>
+  {% elif form.tipo_operacion.value == 'P' %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        initToggleFields({
+          triggerId: 'id_titulo_deuda',                
+          dependentIds: ['id_codigo_titulo'],           
+          shouldShowFn: function() {
+            return document.getElementById('id_titulo_deuda').checked;
+          }
+        });
+      });
+    </script>
+  {% endif %}
+{% endblock %}

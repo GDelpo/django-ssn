@@ -1,0 +1,145 @@
+# ===========================================
+# .dockerignore - SSN Django Application
+# ===========================================
+# Este archivo indica a Docker qué archivos/carpetas
+# NO deben copiarse al contexto de build, reduciendo
+# el tamaño de transferencia y mejorando tiempos de build.
+
+# -------------------------------------------
+# Git
+# -------------------------------------------
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# -------------------------------------------
+# Python bytecode y cache
+# -------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.so
+*.egg
+*.egg-info/
+.eggs/
+
+# -------------------------------------------
+# Entornos virtuales
+# -------------------------------------------
+venv/
+.venv/
+ENV/
+env/
+.conda/
+
+# -------------------------------------------
+# IDEs y editores
+# -------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# -------------------------------------------
+# Bases de datos locales
+# -------------------------------------------
+*.sqlite3
+*.db
+
+# -------------------------------------------
+# Archivos de entorno (excepto .env.build)
+# -------------------------------------------
+.env
+.env.local
+.env.*.local
+!.env.build
+
+# -------------------------------------------
+# Logs
+# -------------------------------------------
+*.log
+logs/
+ssn/logs/
+
+# -------------------------------------------
+# Media y archivos subidos
+# -------------------------------------------
+media/
+ssn/media/
+
+# -------------------------------------------
+# Archivos estáticos compilados localmente
+# -------------------------------------------
+staticfiles/
+static_root/
+ssn/apps/theme/static/css/dist/
+
+# -------------------------------------------
+# Node.js (Tailwind dev dependencies)
+# -------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------------------------
+# Tailwind CLI descargado
+# -------------------------------------------
+.tailwindcss/
+
+# -------------------------------------------
+# Tests y cobertura
+# -------------------------------------------
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+*.cover
+
+# -------------------------------------------
+# Documentación (excepto README para referencia)
+# -------------------------------------------
+docs/
+LICENSE
+
+# -------------------------------------------
+# Docker (evitar copiar archivos de compose)
+# -------------------------------------------
+docker-compose.override.yml
+
+# -------------------------------------------
+# Archivos de sistema
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+*.pid
+
+# -------------------------------------------
+# Ruff / Linters
+# -------------------------------------------
+.ruff_cache/
+.mypy_cache/
+
+# -------------------------------------------
+# Scripts locales de desarrollo
+# -------------------------------------------
+deploy.sh
+generate_secret_key.py
+
+# -------------------------------------------
+# Otros
+# -------------------------------------------
+*.bak
+*.tmp
+*.temp
+.cache/

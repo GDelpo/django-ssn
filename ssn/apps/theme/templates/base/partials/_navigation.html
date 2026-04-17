@@ -1,0 +1,58 @@
+{% comment %}
+Este fragmento recibe una variable 'mobile' (True/False)
+para ajustar las clases CSS según el contexto.
+{% endcomment %}
+
+{% with base_class="px-3 py-2 font-medium rounded-md" %}
+<a href="{% url 'theme:index' %}"
+   class="{{ base_class }}
+          {% if mobile %}block text-base{% else %}inline-flex items-center text-sm{% endif %}
+          {% if request.resolver_match.url_name == 'home' %}bg-blue-100 text-blue-600{% else %}text-gray-600 hover:bg-gray-100 hover:text-blue-600{% endif %}">
+    <i class="fas fa-home mr-1.5"></i>
+    <span class="{% if not mobile %}hidden sm:inline{% endif %}">Inicio</span>
+</a>
+{% endwith %}
+
+{% with base_class="px-3 py-2 font-medium rounded-md" %}
+<a href="{% url 'operaciones:lista_solicitudes' %}"
+   class="{{ base_class }}
+          {% if mobile %}block text-base{% else %}inline-flex items-center text-sm{% endif %}
+          {% if request.resolver_match.url_name == 'lista_solicitudes' %}bg-blue-100 text-blue-600{% else %}text-gray-600 hover:bg-gray-100 hover:text-blue-600{% endif %}">
+    <i class="fas fa-list-alt mr-1.5"></i>
+    <span class="{% if not mobile %}hidden sm:inline{% endif %}">Solicitudes</span>
+</a>
+{% endwith %}
+
+{# Separador y menú de usuario #}
+{% if mobile %}
+  <div class="border-t border-gray-200 my-2"></div>
+{% else %}
+  <span class="text-gray-300 mx-2">|</span>
+{% endif %}
+
+{% with base_class="px-3 py-2 font-medium rounded-md" %}
+{% if user.is_authenticated %}
+  <a href="{% url 'accounts:profile' %}"
+     class="{{ base_class }}
+            {% if mobile %}block text-base{% else %}inline-flex items-center text-sm{% endif %}
+            {% if request.resolver_match.url_name == 'profile' %}bg-blue-100 text-blue-600{% else %}text-gray-600 hover:bg-gray-100 hover:text-blue-600{% endif %}">
+      <i class="fas fa-user-circle mr-1.5"></i>
+      <span class="{% if not mobile %}hidden sm:inline{% endif %}">{{ user.get_short_name }}</span>
+  </a>
+  <a href="{% url 'accounts:logout' %}"
+     class="{{ base_class }}
+            {% if mobile %}block text-base{% else %}inline-flex items-center text-sm{% endif %}
+            text-gray-600 hover:bg-red-50 hover:text-red-600">
+      <i class="fas fa-sign-out-alt mr-1.5"></i>
+      <span class="{% if not mobile %}hidden sm:inline{% endif %}">Salir</span>
+  </a>
+{% else %}
+  <a href="{% url 'accounts:login' %}"
+     class="{{ base_class }}
+            {% if mobile %}block text-base{% else %}inline-flex items-center text-sm{% endif %}
+            {% if request.resolver_match.url_name == 'login' %}bg-blue-100 text-blue-600{% else %}text-gray-600 hover:bg-gray-100 hover:text-blue-600{% endif %}">
+      <i class="fas fa-sign-in-alt mr-1.5"></i>
+      <span class="{% if not mobile %}hidden sm:inline{% endif %}">Iniciar Sesión</span>
+  </a>
+{% endif %}
+{% endwith %}

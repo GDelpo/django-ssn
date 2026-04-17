@@ -1,0 +1,140 @@
+{% extends "lists/partials/_base_list.html" %} 
+{% load component_tags %}
+{% block list_content %} 
+      <table class="min-w-full table-auto divide-y divide-gray-200 bg-white rounded-lg overflow-hidden shadow-sm block md:table">
+          <caption class="sr-only">{{title}}</caption>
+          <thead role="rowgroup" class="hidden md:table-header-group bg-gradient-to-r from-blue-50 to-white divide-y divide-gray-200">
+            <tr role="row" class="block md:table-row">
+              <th role="columnheader"class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+                Tipo de operación
+              </th>
+              <th role="columnheader" class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+                {% if base_request.tipo_entrega == 'Semanal' %}
+                  Fecha movimiento
+                {% else %}
+                  En Custodia
+                {% endif %}
+              </th>
+              <th role="columnheader" class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+                {% if base_request.tipo_entrega == 'Semanal' %}
+                  Especie x Cant. | Cód.CDF
+                {% else %}
+                  Especie - Cód.
+                {% endif %}
+              </th>
+              <th role="columnheader" class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider md:table-cell">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup" class="block md:table-row-group divide-y divide-gray-200">
+            {% for op in operations %}
+            <tr role="row"class="bg-white odd:bg-gray-50 hover:bg-blue-50 block md:table-row border-b md:border-0 transition-colors">
+              <td role="gridcell"class="px-4 py-3 md:table-cell block text-sm text-gray-700 text-center md:text-left"data-label="Tipo de operación">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Tipo de operación</span>
+                <div class="flex items-center justify-center md:justify-start">
+                  {% include "lists/partials/_tipo_chip.html" with tipo=op.tipo_operacion valor=op.get_tipo_operacion_display show_icon=True %}
+                </div>
+              </td>
+              <td role="gridcell" class="px-4 py-3 md:table-cell block text-sm text-gray-700 whitespace-nowrap text-center md:text-left" data-label="Fecha movimiento">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">
+                  {% if base_request.tipo_entrega == 'Semanal' %}
+                    Fecha movimiento
+                  {% else %}
+                    En Custodia
+                  {% endif %}
+                </span>
+                <div class="flex items-center justify-center md:justify-start">
+                  {% if base_request.tipo_entrega == 'Semanal' %}
+                    <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                    {{ op.fecha_operacion|date:"d/m/Y" }} 
+                  {% else %}
+                    {% if op.en_custodia %}
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-0.5"></i> Si
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <i class="fas fa-times-circle mr-0.5"></i> No
+                      </span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+              <td role="gridcell" class="px-4 py-3 md:table-cell block text-sm text-gray-700 whitespace-nowrap text-center md:text-left" data-label="Especie x Cant.">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">
+                  {% if base_request.tipo_entrega == 'Semanal' %}
+                    Especie x Cant. | Cód. CDF
+                  {% else %}
+                    Especie - Cód.
+                  {% endif %}
+                </span>
+                <div class="flex items-center justify-center md:justify-start">
+                  <i class="fas fa-file-invoice-dollar text-gray-400 mr-2"></i>
+                  <span class="font-medium">{{ op }}</span>
+                </div>
+              </td>
+              <td role="gridcell" class="px-4 py-3 md:table-cell block text-sm text-gray-700 text-center md:text-right" data-label="Acciones">
+                <span class="font-semibold md:hidden block text-gray-500 text-xs mb-1 uppercase">Acciones</span>
+                <div class="flex flex-wrap justify-center md:justify-end gap-2">
+                  {% if not base_request.is_editable %}
+                    <!-- Modo solo lectura - mostrar enlace a vista detallada -->
+                    {% url 'operaciones:ver_operacion' uuid=base_request.uuid tipo_operacion=op.tipo_operacion pk=op.id as view_url %}
+                    {% link_button href=view_url label="Ver Detalle" icon="fas fa-eye" color="primary" size="sm" %}
+                  {% else %}
+                    <!-- Modo editable - mostrar acciones normales -->
+                    {% comment %} Armamos el boton de editar  {% endcomment %}
+                    {% url 'operaciones:editar_operacion' uuid=base_request.uuid tipo_operacion=op.tipo_operacion pk=op.id as edit_url %} 
+                    {% link_button href=edit_url label="Editar" icon="fas fa-pen" color="warning" size="sm" %}
+                    {% comment %} Armamos el boton de eliminar {% endcomment %}
+                    {% url 'operaciones:eliminar_operacion' uuid=base_request.uuid tipo_operacion=op.tipo_operacion pk=op.id as delete_url %}
+                    {% link_button href=delete_url label="Eliminar" icon="fas fa-trash" color="danger" size="sm" %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr role="row" class="block md:table-row">
+              <td role="gridcell" colspan="6" class="px-4 py-8 text-center text-gray-500 md:table-cell">
+                <div class="flex flex-col items-center justify-center">
+                  <i class="fas fa-inbox text-gray-300 text-4xl mb-4"></i>
+                  {% if base_request.tipo_entrega == "Mensual" %}
+                    {# Caso mensual sin stocks #}
+                    <p class="text-gray-500">No se generaron stocks para este período.</p>
+                    <p class="text-gray-500 mt-2">
+                      Esto puede deberse a que no existe stock del mes anterior ni operaciones semanales.
+                    </p>
+                  {% else %}
+                    {# Caso semanal sin operaciones #}
+                    <p class="text-gray-500">No se han registrado operaciones.</p>
+                    {% if base_request.is_editable %}
+                      <p class="text-gray-500 mt-2">Para empezar, crea una nueva operación.</p>
+                      {% url 'operaciones:seleccion_tipo_operacion' uuid=base_request.uuid as create_url %}
+                      {% link_button href=create_url label="Crear nueva operación" icon="fas fa-plus" color="primary" %}
+                      <p class="text-gray-500 mt-2">
+                        Si no hubo movimientos, podés enviar la solicitud sin operaciones.
+                      </p>
+                      {% url 'operaciones:enviar_operaciones' uuid=base_request.uuid as empty_url %}
+                      {% link_button href=empty_url|add:'?empty=1' id="sendEmptyBtn" label="Enviar solicitud sin operaciones" icon="fas fa-paper-plane" color="danger" %}
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    {% comment %} Si es semanal, se carga un script {% endcomment %}
+    {% if base_request.tipo_entrega == "Semanal" %}
+      {% block extra_js %}
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              initConfirmButton(
+                "#sendEmptyBtn",
+                "¿Estás seguro de enviar la solicitud vacía?"
+              );
+            });
+          </script>
+      {% endblock %}
+    {% endif %}
+{% endblock %} 

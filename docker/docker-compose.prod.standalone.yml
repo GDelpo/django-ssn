@@ -1,0 +1,148 @@
+# ============================================================================
+# SSN Django - Docker Compose (Production Standalone)
+# ============================================================================
+#
+# Production deployment WITHOUT Traefik.
+# Includes Nginx with SSL (self-signed or Let's Encrypt) + Certbot.
+#
+# Use this when:
+#   - Running without Traefik (direct access with Nginx)
+#   - Need self-contained SSL certificate management
+#
+# USAGE:
+#   cd python_django_ssn
+#   docker compose --env-file .env -f docker/docker-compose.prod.standalone.yml up -d --build
+#   docker compose --env-file .env -f docker/docker-compose.prod.standalone.yml logs -f
+#
+# ACCESS:
+#   HTTP:   http://<server>:${NGINX_PORT_HTTP}  (redirects to HTTPS)
+#   HTTPS:  https://<server>:${NGINX_PORT_HTTPS}
+#   Health: https://<server>:${NGINX_PORT_HTTPS}/health/
+#
+# REQUIRED .env VARS:
+#   POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, SECRET_KEY, ALLOWED_HOSTS,
+#   SSL_DOMAIN, SSL_IP, NGINX_PORT_HTTP, NGINX_PORT_HTTPS, DJANGO_SETTINGS_MODULE
+# ============================================================================
+
+name: ssn
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: ssn_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ssn_postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Django Web (Gunicorn)
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+      args:
+        UID: ${LOCAL_UID:-1000}
+        GID: ${LOCAL_GID:-1000}
+    image: ssn-web:${PROJECT_VERSION:-latest}
+    container_name: reports_web
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      PYTHONPATH: /app/ssn
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      # Hardcoded: production compose ALWAYS uses production settings
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      DEBUG: "False"
+    volumes:
+      - ssn_media:/app/ssn/media
+      - ssn_logs:/app/ssn/logs
+      - ssn_static:/app/static
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-H", "X-Forwarded-Proto: https", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Nginx (SSL termination + static files)
+  # ---------------------------------------------------------------------------
+  nginx:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.nginx
+    container_name: ssn_nginx
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      WEB_UPSTREAM: web:8000
+    ports:
+      - "${NGINX_HOST:-0.0.0.0}:${NGINX_PORT_HTTP:-80}:${NGINX_PORT_HTTP:-80}"
+      - "${NGINX_HOST:-0.0.0.0}:${NGINX_PORT_HTTPS:-443}:${NGINX_PORT_HTTPS:-443}"
+    volumes:
+      - ssn_static:/app/static:ro
+      - ssn_media:/app/ssn/media:ro
+      - ssn_certbot_certs:/etc/letsencrypt
+      - ssn_certbot_www:/var/www/certbot
+    depends_on:
+      - web
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Certbot (certificate auto-renewal)
+  # ---------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: ssn_certbot
+    restart: unless-stopped
+    volumes:
+      - ssn_certbot_certs:/etc/letsencrypt
+      - ssn_certbot_www:/var/www/certbot
+    depends_on:
+      - nginx
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - ssn-internal
+
+volumes:
+  ssn_postgres_data:
+    name: ssn_postgres_data
+  ssn_static:
+    name: ssn_static
+  ssn_media:
+    name: ssn_media
+  ssn_logs:
+    name: ssn_logs
+  ssn_certbot_certs:
+    name: ssn_certbot_certs
+  ssn_certbot_www:
+    name: ssn_certbot_www
+
+networks:
+  ssn-internal:
+    driver: bridge

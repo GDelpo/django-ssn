@@ -1,0 +1,9 @@
+<footer class="relative">
+  {% include 'componentes/messages.html' %}
+  <div class="static bottom-0 bg-white border-t border-gray-200 w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-gray-500">
+    <a href="{{ COMPANY_WEBSITE }}" target="_blank" rel="noopener noreferrer">
+      <strong>© {% now "Y" %} {{ COMPANY_NAME }}</strong> | Entidad autorizada por la
+      <strong>Superintendencia de Seguros de la Nación</strong>. Registro <strong>Nº {{ COMPANY_REGISTRATION_NUMBER }}</strong>
+    </a>
+  </div>
+</footer>

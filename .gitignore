@@ -1,0 +1,119 @@
+# ===========================================
+# .gitignore - SSN Django Application
+# ===========================================
+
+# -------------------------------------------
+# Python
+# -------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+*.so
+.Python
+
+# -------------------------------------------
+# Django
+# -------------------------------------------
+*.sqlite3
+*.log
+*.pot
+*.mo
+local_settings.py
+db.sqlite3
+
+# -------------------------------------------
+# Media & Static (generados)
+# -------------------------------------------
+media/
+staticfiles/
+static_root/
+media_root/
+ssn/media/
+
+# -------------------------------------------
+# Logs
+# -------------------------------------------
+logs/
+ssn/logs/
+*.log
+
+# -------------------------------------------
+# Environment
+# -------------------------------------------
+.env
+.env.local
+.env.*.local
+# Nota: .env.build SÍ se commitea (necesario para Docker build)
+
+# -------------------------------------------
+# Virtualenvs
+# -------------------------------------------
+venv/
+.venv/
+ENV/
+env/
+.conda/
+
+# -------------------------------------------
+# IDEs & Editors
+# -------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# -------------------------------------------
+# macOS / Windows
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+*.pid
+
+# -------------------------------------------
+# Docker
+# -------------------------------------------
+docker-compose.override.yml
+
+# -------------------------------------------
+# Ruff / Linters / Testing
+# -------------------------------------------
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# -------------------------------------------
+# Node.js (para Tailwind)
+# -------------------------------------------
+node_modules/
+
+# -------------------------------------------
+# Django Tailwind
+# -------------------------------------------
+# Binario descargado del CLI de Tailwind
+.tailwindcss/
+# CSS compilado en modo desarrollo
+ssn/apps/theme/static/css/dist/
+
+# -------------------------------------------
+# Fixtures con datos sensibles
+# -------------------------------------------
+# Descomentar si no quieres trackear fixtures
+# ssn/apps/operaciones/fixtures/
+
+# -------------------------------------------
+# Archivos temporales
+# -------------------------------------------
+*.bak
+*.tmp
+*.temp
+.cache/

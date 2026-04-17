@@ -1,0 +1,13 @@
+<div class="md:col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+  <h3 class="text-lg font-semibold text-blue-700 mb-3">
+    <i class="fas fa-file-invoice mr-2"></i> Información Principal
+  </h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {# Renderizamos tipo_operacion y codigo_afectacion primero #}
+    {% for field in form %}
+      {% if field.name == "tipo_operacion" or field.name == "codigo_afectacion" %}
+        {% include "forms/partials/_field.html" with field=field special_fields="tipo_operacion codigo_afectacion" %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>

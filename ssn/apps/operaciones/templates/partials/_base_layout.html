@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+  {% if extra_info %}
+    {% include "partials/_extra_info.html" %}
+  {% endif %}
+  
+  <div class="max-w-3xl mx-auto">
+    
+    {% if breadcrumb_items %}
+      {% include "componentes/breadcrumb.html" %}
+    {% endif %}
+
+    {% include "componentes/card_header.html" with title=title header_buttons=header_buttons %}
+
+    {# Incluimos el banner de información contextual dependiendo del estado de la solicitud #}
+    {% if base_request %}
+      {% include "partials/_banner_info.html" %}
+    {% endif %}
+    
+    {# Contenedor principal para el contenido (la caja blanca) #}
+    <div class="bg-white/70 border border-gray-200 rounded-lg shadow-sm p-6 overflow-hidden">
+      
+      {# Un nuevo bloque para el contenido principal (el formulario o la tabla) #}
+      {% block main_content_operaciones %}{% endblock %}
+
+    </div>
+
+    {# Bloque adicional para contenido fuera de la caja principal, como la paginación #}
+    {% block after_main_content_operaciones %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

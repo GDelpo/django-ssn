@@ -1,0 +1,51 @@
+{% extends "lists/partials/_base_list.html" %}
+{% block list_content %}
+    <h3 class="text-lg font-bold text-blue-600 truncate mb-6">
+      Solicitud ID:
+      <span id="uuidSolicitud" class="font-medium text-blue-800 italic cursor-pointer hover:text-blue-600 hover:underline transition duration-200">
+        {{ solicitud.uuid }}
+      </span>
+    </h3>
+    {% for r in respuestas %}
+      <div class="mb-6">
+        <details class="group" {% if forloop.first %}open{% endif %}>
+          <summary class="flex items-center cursor-pointer">
+            <span class="text-md font-bold text-blue-600">
+              Endpoint: <span class="font-mono">{{ r.obj.endpoint }}</span>
+            </span>
+            <span class="ml-3 text-xs text-gray-500">
+              Status: {{ r.obj.status_http }} |
+              {{ r.obj.created_at|date:"Y-m-d H:i" }}
+              {% if r.obj.es_error %}
+                <span class="text-red-600 font-bold ml-2">Error</span>
+              {% else %}
+                <span class="text-green-600 font-bold ml-2">OK</span>
+              {% endif %}
+            </span>
+            <span class="ml-auto transition-transform group-open:rotate-180">
+              <i class="fas fa-chevron-down"></i>
+            </span>
+          </summary>
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <div class="mb-2 text-xs text-gray-400">
+              Actualizado: {{ r.obj.updated_at|date:"Y-m-d H:i" }}
+            </div>
+            <h5 class="text-sm font-semibold mb-2">Payload Enviado</h5>
+            <pre class="bg-gray-50 p-3 border rounded mb-4 max-h-64 overflow-auto">{{ r.formatted_payload }}</pre>
+            <h5 class="text-sm font-semibold mb-2">Respuesta Recibida</h5>
+            <pre class="bg-gray-50 p-3 border rounded max-h-64 overflow-auto">{{ r.formatted_response }}</pre>
+          </div>
+        </details>
+      </div>
+    {% empty %}
+      <div class="text-gray-500 italic">No hay respuestas registradas para esta solicitud.</div>
+    {% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    initCopyToClipboard('uuidSolicitud', 'uuidSolicitud', 'UUID copiado al portapapeles', 'Error al copiar el UUID');
+  });
+</script>
+{% endblock %}

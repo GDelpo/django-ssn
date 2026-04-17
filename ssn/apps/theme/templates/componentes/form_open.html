@@ -1,0 +1,2 @@
+<form method="{{ method|default:'post' }}" action="{{ action|default:'' }}" enctype="multipart/form-data" class="space-y-6" id="{{ form_id|default:'dynamic-form' }}">
+    {% csrf_token %}

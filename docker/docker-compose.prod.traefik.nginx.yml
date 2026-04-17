@@ -1,0 +1,94 @@
+# ============================================================================
+# SSN Django - Nginx Override for Traefik Mode
+# ============================================================================
+#
+# This is a Docker Compose OVERRIDE file. It adds Nginx in front of Gunicorn
+# for serving static/media files via Nginx instead of WhiteNoise.
+#
+# USE THIS WHEN:
+#   - You have very high traffic on static files
+#   - You need advanced Nginx features (caching rules, gzip tuning, etc.)
+#   - You prefer Nginx handling static/media for performance reasons
+#
+# USAGE (always combined with the base traefik file):
+#   cd python_django_ssn
+#   docker compose --env-file .env \
+#     -f docker/docker-compose.prod.traefik.yml \
+#     -f docker/docker-compose.prod.traefik.nginx.yml \
+#     up -d --build
+#
+# ARCHITECTURE:
+#   Client → Traefik → Nginx (static/media) → Gunicorn (Django)
+#
+# WHAT THIS OVERRIDE DOES:
+#   1. Disables Traefik labels on web (traefik.enable=false)
+#   2. Removes web from traefik-public network
+#   3. Adds Nginx service with Traefik labels
+#   4. Nginx serves static/media and proxies dynamic requests to Gunicorn
+# ============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Override: Remove Traefik exposure from web
+  # ---------------------------------------------------------------------------
+  web:
+    # Disable direct Traefik routing (Nginx will be the entrypoint)
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - ssn-internal
+
+  # ---------------------------------------------------------------------------
+  # Nginx (static/media files + proxy to Gunicorn)
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: ssn_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/traefik.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ssn_static:/app/static:ro
+      - ssn_media:/app/ssn/media:ro
+    depends_on:
+      - web
+    networks:
+      - ssn-internal
+      - traefik-public
+    labels:
+      # Enable Traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+
+      # Router: Host-based routing (same domain, lowest priority)
+      - "traefik.http.routers.ssn.rule=Host(`${SSL_DOMAIN}`)"
+      - "traefik.http.routers.ssn.entrypoints=web"
+      - "traefik.http.routers.ssn.service=ssn"
+      - "traefik.http.routers.ssn.priority=1"
+
+      # Middlewares
+      - "traefik.http.routers.ssn.middlewares=rate-limit@file"
+
+      # Service: Load balancer (Nginx port 80)
+      - "traefik.http.services.ssn.loadbalancer.server.port=80"
+      - "traefik.http.services.ssn.loadbalancer.healthcheck.path=/nginx-health"
+      - "traefik.http.services.ssn.loadbalancer.healthcheck.interval=30s"
+
+      # HTTPS Router (uncomment when Traefik has SSL configured)
+      # - "traefik.http.routers.ssn-secure.rule=Host(`${SSL_DOMAIN}`)"
+      # - "traefik.http.routers.ssn-secure.entrypoints=websecure"
+      # - "traefik.http.routers.ssn-secure.tls=true"
+      # - "traefik.http.routers.ssn-secure.service=ssn"
+      # - "traefik.http.routers.ssn-secure.priority=1"
+      # - "traefik.http.routers.ssn-secure.middlewares=rate-limit@file"
+
+volumes:
+  ssn_static:
+    name: ssn_static
+  ssn_media:
+    name: ssn_media
+
+networks:
+  ssn-internal:
+    driver: bridge
+  traefik-public:
+    external: true

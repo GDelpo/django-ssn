@@ -1,0 +1,81 @@
+{% extends "base/base.html" %}
+{% load static tailwind_tags %}
+{% block title %}404 | Página no encontrada{% endblock %}
+
+{% block full_width_content %}
+  <div class="relative bg-gradient-to-r from-blue-700 to-blue-600 overflow-hidden w-full">
+    <div class="w-full">
+      <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:pb-28 xl:pb-32">
+        <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+          <div class="sm:text-center lg:text-left">
+          <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+            <span class="block">404</span>
+            <span class="block text-blue-200">Página no encontrada</span>
+          </h1>
+          <p class="mt-3 text-base text-blue-100 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+            Ups, la página que buscás no existe o fue movida.<br>
+            Si llegaste aquí desde un enlace interno, podés volver al inicio o contactarnos.
+          </p>
+          <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+            <div class="rounded-md shadow">
+            <a
+              href="{% url 'theme:index' %}"
+              class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-900 hover:bg-blue-800 md:py-4 md:text-lg md:px-10 transition duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+            >
+              <i class="fas fa-home mr-2"></i>
+              Inicio
+            </a>
+            </div>
+            <div class="mt-3 sm:mt-0 sm:ml-3">
+            <a
+              href="mailto:{{ support_email|default:'support@example.com' }}"
+              class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10 transition duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+            >
+              <i class="fas fa-headset mr-2"></i>
+              Contactar Soporte
+            </a>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block extra_js %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    // Animación para secciones principales
+      const sections = document.querySelectorAll(".bg-white\\/70");
+      sections.forEach((section, index) => {
+        setTimeout(() => {
+          section.classList.add("animate-fadeIn");
+        }, index * 200);
+      });
+    });
+  </script>
+{% endblock %}
+{% block extra_css %}<style>
+  .animate-fadeIn {
+    animation: fadeIn 0.8s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0.5;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Estilos específicos para ocultar los iconos del proceso en móviles */
+  @media (max-width: 767px) {
+    .proceso-icono {
+      display: none !important;
+    }
+  }
+</style>
+{% endblock %}

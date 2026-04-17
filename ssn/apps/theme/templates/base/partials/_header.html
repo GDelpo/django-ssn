@@ -1,0 +1,59 @@
+<header class="bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16 items-center">
+      <div class="flex items-center">
+        <a href="/" class="flex items-center">
+          {% comment %} Se puede subir a static/img y referenciarlo. Pero siempre es mejor referenciar a un externo{% endcomment %}
+          <img src="{{ COMPANY_LOGO_URL }}" alt="{{ COMPANY_NAME }}" class="h-12 w-auto mr-3">
+        </a>
+      </div>
+
+      <nav class="hidden sm:flex space-x-4 items-center">
+        {% include "base/partials/_navigation.html" with mobile=False %}
+        
+        {# Indicador de notificaciones #}
+        {% if user.is_authenticated and alerts_count > 0 %}
+        <div class="relative ml-2">
+          <button type="button" 
+                  onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('alerts-expanded')?.classList.remove('hidden');"
+                  class="relative p-2 rounded-full {% if has_urgent_alerts %}text-red-600 hover:bg-red-50{% else %}text-yellow-600 hover:bg-yellow-50{% endif %} transition-colors"
+                  title="Ver alertas pendientes">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none transform translate-x-1/2 -translate-y-1/2 {% if has_urgent_alerts %}bg-red-600{% else %}bg-yellow-500{% endif %} text-white rounded-full">
+              {{ alerts_count }}
+            </span>
+          </button>
+        </div>
+        {% endif %}
+      </nav>
+
+      <div class="flex items-center sm:hidden">
+        {# Indicador móvil #}
+        {% if user.is_authenticated and alerts_count > 0 %}
+        <button type="button" 
+                onclick="window.scrollTo({top: 0, behavior: 'smooth'});"
+                class="relative p-2 mr-2 {% if has_urgent_alerts %}text-red-600{% else %}text-yellow-600{% endif %}">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+          <span class="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold {% if has_urgent_alerts %}bg-red-600{% else %}bg-yellow-500{% endif %} text-white rounded-full">
+            {{ alerts_count }}
+          </span>
+        </button>
+        {% endif %}
+        
+        <button id="mobile-menu-button" aria-label="Abrir menú" class="p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sm:hidden hidden" id="mobile-menu">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      {% include "base/partials/_navigation.html" with mobile=True %}
+    </div>
+  </nav>
+</header>

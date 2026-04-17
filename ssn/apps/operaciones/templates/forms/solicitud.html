@@ -1,0 +1,104 @@
+﻿{% extends "forms/partials/_base_form.html" %}
+{% block extra_form_content %}
+  <div class="bg-white/70 border border-gray-200 rounded-lg shadow-sm p-6 mb-6 overflow-hidden">
+    <details class="group">
+      <summary class="flex items-center cursor-pointer">
+        <span class="text-lg font-bold text-blue-600 truncate">Recuperar operacion (UUID)</span>
+        <span class="ml-auto transition-transform group-open:rotate-180">
+          <i class="fas fa-chevron-down"></i>
+        </span>
+      </summary>
+
+      <div class="mt-4 pt-4 border-t border-gray-100">
+        <form method="get" action="" class="grid grid-cols-1 gap-6">
+          <div>
+            <label for="recover_uuid" class="block text-sm font-medium text-gray-700 mb-1">
+              Ingrese el UUID:
+            </label>
+            <div class="flex items-center">
+              <div class="relative flex-grow">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="fas fa-key text-gray-400"></i>
+                </div>
+                <input type="text" name="recover_uuid" id="recover_uuid"
+                       placeholder="Ej: 550e8400-e29b-41d4-a716-446655440000"
+                       class="pl-10 w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all">
+              </div>
+              <button type="submit" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i> Recuperar
+              </button>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">
+              Ingrese el UUID de una solicitud existente para recuperar sus datos.
+            </p>
+          </div>
+        </form>
+      </div>
+    </details>
+  </div>
+{% endblock %}
+
+{% block form_fields %}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for field in form %}
+      {% include "forms/partials/_field.html"  with field=field special_fields="cronograma_semanal cronograma_mensual" %}
+    {% endfor %}
+  </div>
+{% endblock %}
+
+{% block submit_button %}
+  {# Botón inicial - se modifica via JS según tipo_entrega #}
+  <div id="submitBtnWrapper" class="w-full">
+    {% include "componentes/button.html" with id="submitBtn" icon="fas fa-plus" label=button_text color="primary" %}
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      initToggleFields({
+        triggerId: 'id_tipo_entrega',
+        dependentIds: ['cronograma_semanal'],
+        shouldShowFn: function(valor) {
+          return valor === 'SEMANAL';
+        }
+      });
+
+      initToggleFields({
+        triggerId: 'id_tipo_entrega',
+        dependentIds: ['cronograma_mensual'],
+        shouldShowFn: function(valor) {
+          return valor === 'MENSUAL';
+        }
+      });
+
+      // Cambiar botón según tipo de entrega
+      const tipoEntregaSelect = document.getElementById('id_tipo_entrega');
+      const submitBtn = document.getElementById('submitBtn');
+      const defaultLabel = '{{ button_text }}';
+
+      function updateSubmitButton() {
+        const valor = tipoEntregaSelect.value.toUpperCase();
+        const iconEl = submitBtn.querySelector('i');
+        const labelEl = submitBtn.querySelector('span span');
+        
+        if (valor === 'MENSUAL') {
+          if (labelEl) labelEl.textContent = 'Generar Mensual';
+          if (iconEl) iconEl.className = 'fas fa-magic mr-1.5';
+          // Cambiar de primary (blue) a warning (yellow)
+          submitBtn.classList.remove('bg-blue-100', 'text-blue-700', 'hover:bg-blue-200');
+          submitBtn.classList.add('bg-yellow-100', 'text-yellow-800', 'hover:bg-yellow-200');
+        } else {
+          if (labelEl) labelEl.textContent = defaultLabel;
+          if (iconEl) iconEl.className = 'fas fa-plus mr-1.5';
+          // Volver a primary (blue)
+          submitBtn.classList.remove('bg-yellow-100', 'text-yellow-800', 'hover:bg-yellow-200');
+          submitBtn.classList.add('bg-blue-100', 'text-blue-700', 'hover:bg-blue-200');
+        }
+      }
+
+      updateSubmitButton();
+      tipoEntregaSelect.addEventListener('change', updateSubmitButton);
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,109 @@
+# =============================================================================
+# Ejemplo de configuración Apache como reverse proxy
+# =============================================================================
+#
+# Para servidores que ya tienen Apache instalado.
+#
+# Prerequisitos:
+#   - Módulos habilitados: proxy, proxy_http, ssl, headers
+#     sudo a2enmod proxy proxy_http ssl headers rewrite
+#
+# Instalación:
+#   1. Copiar a /etc/apache2/sites-available/ssn-app.conf
+#   2. Habilitar: sudo a2ensite ssn-app.conf
+#   3. Recargar: sudo systemctl reload apache2
+# =============================================================================
+
+# Redirección HTTP -> HTTPS
+<VirtualHost *:80>
+    ServerName tu-dominio.com
+    ServerAlias www.tu-dominio.com
+    
+    # Para Let's Encrypt
+    DocumentRoot /var/www/certbot
+    
+    <Directory /var/www/certbot>
+        Options None
+        AllowOverride None
+        Require all granted
+    </Directory>
+    
+    # Redireccionar todo excepto .well-known
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge/
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}$1 [R=301,L]
+</VirtualHost>
+
+# Servidor HTTPS
+<VirtualHost *:443>
+    ServerName tu-dominio.com
+    ServerAlias www.tu-dominio.com
+    
+    # ===================
+    # SSL Configuration
+    # ===================
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/tu-dominio.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/tu-dominio.com/privkey.pem
+    
+    # Configuración SSL moderna
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384
+    SSLHonorCipherOrder off
+    
+    # ===================
+    # Headers de seguridad
+    # ===================
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # HSTS (descomentar si estás seguro)
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # ===================
+    # Archivos estáticos
+    # ===================
+    Alias /static/ /path/to/static_files/
+    <Directory /path/to/static_files>
+        Require all granted
+        Options -Indexes
+        
+        # Cache para estáticos
+        <FilesMatch "\.(css|js|ico|gif|jpg|jpeg|png|svg|woff|woff2)$">
+            Header set Cache-Control "max-age=2592000, public"
+        </FilesMatch>
+    </Directory>
+    
+    # ===================
+    # Archivos media
+    # ===================
+    Alias /media/ /path/to/media_files/
+    <Directory /path/to/media_files>
+        Require all granted
+        Options -Indexes
+    </Directory>
+    
+    # ===================
+    # Proxy a la aplicación Django
+    # ===================
+    ProxyPreserveHost On
+    ProxyPass /static/ !
+    ProxyPass /media/ !
+    
+    ProxyPass / http://127.0.0.1:8000/
+    ProxyPassReverse / http://127.0.0.1:8000/
+    
+    # Headers para el proxy
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Forwarded-Port "443"
+    
+    # ===================
+    # Límites
+    # ===================
+    LimitRequestBody 10485760
+    
+    # Logs
+    ErrorLog ${APACHE_LOG_DIR}/ssn-app-error.log
+    CustomLog ${APACHE_LOG_DIR}/ssn-app-access.log combined
+</VirtualHost>
