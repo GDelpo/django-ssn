@@ -23,7 +23,7 @@
       <!-- Header - blue gradient like home hero -->
       <div class="bg-gradient-to-r from-blue-700 to-blue-600 px-6 py-8 text-center">
         <h1 class="text-2xl font-extrabold text-white">Operaciones SSN</h1>
-        <p class="mt-1 text-sm text-blue-200">Iniciá sesión para continuar</p>
+        <p class="mt-1 text-sm text-blue-200">Sign in to continue</p>
       </div>
 
       <!-- Alerts -->
@@ -96,7 +96,7 @@
           <!-- Submit -->
           <button type="submit" class="w-full flex items-center justify-center px-8 py-3 text-base font-medium rounded-md text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:-translate-y-0.5 hover:shadow-lg">
             <i class="fas fa-sign-in-alt mr-2"></i>
-            Iniciar Sesión
+            Sign in
           </button>
         </form>
       </div>
@@ -104,15 +104,15 @@
       <!-- Footer -->
       <div class="bg-gray-50 px-8 py-4 border-t border-gray-200 flex items-center justify-between">
         <span class="text-xs text-gray-400">
-          <i class="fas fa-shield-alt mr-1 text-blue-400"></i>Conexión segura
+          <i class="fas fa-shield-alt mr-1 text-blue-400"></i>Secure connection
         </span>
         {% if use_identity_service %}
         <span class="text-xs text-blue-600 font-medium">
-          <i class="fas fa-cloud mr-1"></i>Servicio de Identidad
+          <i class="fas fa-cloud mr-1"></i>Identity Service
         </span>
         {% else %}
         <span class="text-xs text-gray-500 font-medium">
-          <i class="fas fa-database mr-1"></i>Base de Datos Local
+          <i class="fas fa-database mr-1"></i>Local Database
         </span>
         {% endif %}
       </div>
@@ -120,7 +120,7 @@
 
     <!-- Support -->
     <p class="mt-5 text-center text-sm text-gray-500">
-      ¿Problemas para iniciar sesión?
+      Trouble signing in?
       <a href="mailto:{{ support_email }}" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
         {{ support_email }}
       </a>

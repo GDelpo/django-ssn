@@ -27,14 +27,14 @@ class LoginForm(forms.Form):
         max_length=254,
         widget=forms.EmailInput(
             attrs={
-                "placeholder": "ejemplo@empresa.com",
+                "placeholder": "you@company.com",
                 "autocomplete": "email",
             }
         ),
     )
 
     password = forms.CharField(
-        label="Contraseña",
+        label="Password",
         max_length=128,
         widget=forms.PasswordInput(
             attrs={
@@ -45,7 +45,7 @@ class LoginForm(forms.Form):
     )
 
     remember_me = forms.BooleanField(
-        label="Recuérdame en este dispositivo",
+        label="Remember me on this device",
         required=False,
     )
 
@@ -64,9 +64,9 @@ class LoginForm(forms.Form):
         password = cleaned_data.get("password")
 
         if not email:
-            raise forms.ValidationError("El email es requerido.")
+            raise forms.ValidationError("Email is required.")
         if not password:
-            raise forms.ValidationError("La contraseña es requerida.")
+            raise forms.ValidationError("Password is required.")
 
         return cleaned_data
 
@@ -75,11 +75,11 @@ class LocalUserCreationForm(forms.ModelForm):
     """Form for creating local users (admin only)."""
 
     password1 = forms.CharField(
-        label="Contraseña",
+        label="Password",
         widget=forms.PasswordInput(),
     )
     password2 = forms.CharField(
-        label="Confirmar Contraseña",
+        label="Confirm password",
         widget=forms.PasswordInput(),
     )
 
@@ -98,7 +98,7 @@ class LocalUserCreationForm(forms.ModelForm):
         password2 = self.cleaned_data.get("password2")
 
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Las contraseñas no coinciden.")
+            raise forms.ValidationError("Passwords do not match.")
 
         return password2
 

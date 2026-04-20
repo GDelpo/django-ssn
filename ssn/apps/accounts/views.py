@@ -66,7 +66,7 @@ class LoginView(FormView):
                     )  # 30 minutes
                     logger.info(f"✅ User {email} logged in")
 
-                success(self.request, f"¡Bienvenido de regreso, {user.get_short_name()}!")
+                success(self.request, f"Welcome back, {user.get_short_name()}!")
 
                 # Redirect to next page or home
                 next_page = self.request.GET.get("next", self.success_url)
@@ -74,12 +74,12 @@ class LoginView(FormView):
             else:
                 # Authentication failed
                 logger.warning(f"❌ Authentication failed for {email}")
-                error(self.request, "Email o contraseña incorrectos. Por favor, intenta de nuevo.")
+                error(self.request, "Incorrect email or password. Please try again.")
                 return super().form_invalid(form)
 
         except Exception as e:
             logger.error(f"Login error for {email}: {e}")
-            error(self.request, "Error durante la autenticación. Intenta de nuevo.")
+            error(self.request, "Authentication error. Please try again.")
 
         return super().form_invalid(form)
 
@@ -97,9 +97,9 @@ class LoginView(FormView):
         context["use_identity_service"] = bool(
             getattr(settings, "IDENTITY_SERVICE_URL", "").strip()
         )
-        context["page_title"] = "Iniciar Sesión"
+        context["page_title"] = "Sign in"
         context["support_email"] = getattr(
-            settings, "SUPPORT_EMAIL", "soporte@compania.com"
+            settings, "SUPPORT_EMAIL", "support@example.com"
         )
         return context
 
@@ -113,7 +113,7 @@ class LogoutView(View):
             user_email = request.user.email
             logout(request)
             logger.info(f"✅ User {user_email} logged out")
-            success(request, "Sesión cerrada correctamente.")
+            success(request, "Signed out successfully.")
         else:
             logger.warning("Logout attempt from unauthenticated user")
 
@@ -126,7 +126,7 @@ class ProfileView(LoginRequiredMixin, View):
     def get(self, request: HttpRequest) -> HttpResponse:
         """Display user profile."""
         context = {
-            "page_title": "Mi Perfil",
+            "page_title": "My Profile",
             "user": request.user,
         }
         return render(request, "accounts/profile.html", context)
@@ -147,5 +147,5 @@ class LogoutAllView(LoginRequiredMixin, View):
         user_email = request.user.email
         logout(request)
         logger.info(f"✅ User {user_email} logged out from all devices")
-        success(request, "Sesión cerrada en todos los dispositivos.")
+        success(request, "Signed out from all devices.")
         return redirect("accounts:login")
