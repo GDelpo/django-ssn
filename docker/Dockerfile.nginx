@@ -1,7 +1,7 @@
 # Dockerfile.nginx
 FROM nginx:alpine
 
-LABEL maintainer="admin@example.com"
+LABEL maintainer="your-team@example.com"
 
 # 1. Instala herramientas necesarias
 RUN apk add --no-cache openssl certbot
