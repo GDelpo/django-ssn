@@ -1,3 +1,4 @@
+from django.conf import settings
 import logging
 from http import HTTPStatus
 from typing import Tuple, Dict, Any, Optional
@@ -85,7 +86,7 @@ def consultar_estado_ssn(
 
         # Parámetros de consulta
         params = {
-            "codigoCompania": base_request.codigo_compania or "9999",
+            "codigoCompania": base_request.codigo_compania or settings.SSN_API_CIA,
             "cronograma": base_request.cronograma,
         }
 
@@ -380,7 +381,7 @@ def solicitar_rectificacion_ssn(
 
         # 3) Payload mínimo (solo identificadores)
         payload = {
-            "codigoCompania": base_request.codigo_compania or "9999",
+            "codigoCompania": base_request.codigo_compania or settings.SSN_API_CIA,
             "tipoEntrega": base_request.tipo_entrega,
             "cronograma": base_request.cronograma,
         }
