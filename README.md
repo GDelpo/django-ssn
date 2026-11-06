@@ -5,7 +5,6 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.12%2B-blue?logo=python&logoColor=white">
   <img alt="PostgreSQL" src="https://img.shields.io/badge/postgresql-15%2B-336791?logo=postgresql&logoColor=white">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="Status" src="https://img.shields.io/badge/status-stable-green">
 </p>
 
 > Django app to manage financial operations and file presentations with the Argentine SSN (Superintendencia de Seguros de la Nación).
@@ -18,14 +17,14 @@ Targeted at insurance companies subject to SSN oversight: registers weekly and m
 - Submission to SSN API with retries and validation.
 - Historical sync from SSN API (`sync_ssn_data` management command).
 - Deadline alerts by email (`send_deadline_alerts`).
-- Excel import with preview before saving.
+- Excel export of a request preview before submitting it.
 - Two auth modes: local Django DB or delegation to an external identity service.
 
 ## Quickstart
 
 ### Requirements
 
-- Python 3.12+
+- Python 3.12 (pinned `pandas` does not build on 3.14)
 - PostgreSQL 15+ (production) or SQLite (dev)
 - Node.js (for Tailwind build via `django-tailwind`)
 - Valid SSN API credentials (`SSN_API_USERNAME`, `SSN_API_PASSWORD`, `SSN_API_CIA`)
@@ -48,7 +47,8 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env: fill SECRET_KEY, SSN_API_*, POSTGRES_PASSWORD, etc.
-# For dev, set DJANGO_SETTINGS_MODULE=config.settings.dev (uses SQLite + DEBUG=True)
+# For dev with SQLite, set DJANGO_SETTINGS_MODULE=config.settings.dev, USE_SQLITE=True and DEBUG=True.
+# POSTGRES_DB, POSTGRES_USER and POSTGRES_PASSWORD are read anyway: any value works with SQLite.
 ```
 
 See [Configuration](#configuration) below for the full list.
@@ -92,7 +92,7 @@ Variables live in `.env` (copy from `.env.example`):
 | `SSN_API_USERNAME` | SSN API username. | — |
 | `SSN_API_PASSWORD` | SSN API password. | — |
 | `SSN_API_CIA` | SSN company code assigned to your insurer. | — |
-| `SSN_API_BASE_URL` | `https://ri.ssn.gob.ar/api` (prod) or `https://testri.ssn.gob.ar/api` (test). | prod URL |
+| `SSN_API_BASE_URL` | `https://ri.ssn.gob.ar/api` (prod) or `https://testri.ssn.gob.ar/api` (test). | — |
 | `POSTGRES_*` | PostgreSQL connection (`DB`, `USER`, `PASSWORD`, `HOST`, `PORT`). | — |
 | `COMPANY_NAME` / `COMPANY_WEBSITE` / `COMPANY_LOGO_URL` | Branding rendered in templates. | placeholders |
 | `SUPPORT_EMAIL` | Support contact shown in error pages. | `support@example.com` |
@@ -129,6 +129,15 @@ python ssn/manage.py send_deadline_alerts
 python ssn/manage.py send_deadline_alerts --dry-run
 python ssn/manage.py send_deadline_alerts --level danger
 ```
+
+## Tests
+
+```bash
+cd ssn
+python manage.py test
+```
+
+Uses the variables above; no database server or `collectstatic` is needed with `USE_SQLITE=True`. Coverage is limited to `accounts` (login, logout, profile and auth backends): operations and the SSN client have no automated tests yet.
 
 ## Architecture
 

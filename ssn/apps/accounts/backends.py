@@ -84,7 +84,11 @@ class IdentityServiceBackend(ModelBackend):
         try:
             auth_service = AuthenticationService()
 
-            # This will use the identity service since it's configured
+            # INTENTIONAL: in local mode the service calls django.contrib.auth.authenticate(),
+            # which comes back to this backend. Without this guard every wrong password recurses.
+            if not auth_service.use_identity_service:
+                return None
+
             user = auth_service.authenticate(username, password)
 
             if user and self.user_can_authenticate(user):

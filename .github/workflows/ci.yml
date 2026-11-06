@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      USE_SQLITE: "True"
+      DEBUG: "True"
+      SECRET_KEY: ci-only-not-secret
+      ALLOWED_HOSTS: localhost
+      POSTGRES_DB: unused
+      POSTGRES_USER: unused
+      POSTGRES_PASSWORD: unused
+      SSN_API_BASE_URL: https://testri.ssn.gob.ar/api
+      SSN_API_CIA: "0"
+      SSN_API_USERNAME: unused
+      SSN_API_PASSWORD: unused
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # Pinned pandas does not build on 3.14 (see README).
+          python-version: "3.12"
+      - run: sudo apt-get install -y libmagic1
+      - run: pip install -r requirements.txt
+      - name: Migrations are in sync with models
+        working-directory: ssn
+        run: python manage.py makemigrations --check --dry-run
+      - name: Tests
+        working-directory: ssn
+        run: python manage.py test

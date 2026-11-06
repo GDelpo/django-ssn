@@ -10,6 +10,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, View
 
+from django.utils.http import url_has_allowed_host_and_scheme
+
 from accounts.forms import LoginForm
 from accounts.middleware import LoginRequiredMixin
 from accounts.services import AuthenticationService
@@ -69,7 +71,13 @@ class LoginView(FormView):
                 success(self.request, f"Welcome back, {user.get_short_name()}!")
 
                 # Redirect to next page or home
-                next_page = self.request.GET.get("next", self.success_url)
+                next_page = self.request.GET.get("next", "")
+                if not url_has_allowed_host_and_scheme(
+                    next_page,
+                    allowed_hosts={self.request.get_host()},
+                    require_https=self.request.is_secure(),
+                ):
+                    next_page = self.success_url
                 return redirect(next_page)
             else:
                 # Authentication failed

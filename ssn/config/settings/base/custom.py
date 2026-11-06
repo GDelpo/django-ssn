@@ -26,6 +26,9 @@ IDENTITY_SERVICE_VERIFY_SSL = config(
     cast=bool,
 )
 
+# --- Tests ---
+TEST_RUNNER = "config.test_runner.ProjectTestRunner"
+
 # --- Otras configuraciones ---
 PREVIEW_MAX_AGE_MINUTES = config("PREVIEW_MAX_AGE_MINUTES", default=5, cast=int)
 LOGGING_APPS = ["operaciones", "ssn_client", "accounts"]

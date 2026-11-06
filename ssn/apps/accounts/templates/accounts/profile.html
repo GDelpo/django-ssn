@@ -137,7 +137,7 @@
         Back to home
       </a>
 
-      <form method="post" action="{% url 'auth:logout_all' %}" class="flex-1">
+      <form method="post" action="{% url 'accounts:logout_all' %}" class="flex-1">
         {% csrf_token %}
         <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition">
           <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
