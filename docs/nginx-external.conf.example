@@ -19,7 +19,7 @@ upstream ssn_app {
     server 127.0.0.1:8000;
     
     # Si corre en otro host (ajustar IP)
-    # server 192.168.1.100:8000;
+    # server 192.0.2.10:8000;  # documentation IP (RFC 5737)
     
     # Para balanceo de carga (múltiples instancias)
     # server 127.0.0.1:8001;
